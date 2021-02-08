@@ -171,17 +171,6 @@ public struct ASCService {
             throw AscError.requestFailed(underlyingErrors: errors)
         }
     }
-
-    // MARK: - Builds
-
-    @discardableResult
-    public static func listBuilds(filters: [Filter] = [],
-                                  limit: UInt) throws -> [Build] {
-
-        let resource = AscResource.listBuilds(filters: filters, limit: limit)
-        let result: RequestResult<[Build]> = network.syncRequest(resource: resource)
-        return try result.get()
-    }
 }
 
 extension ASCService: Service {
