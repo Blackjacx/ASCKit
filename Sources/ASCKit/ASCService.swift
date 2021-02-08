@@ -12,17 +12,6 @@ public struct ASCService {
 
     static let network = Network()
 
-    // MARK: - BetaGroups
-
-    @discardableResult
-    public static func listBetaGroups(filters: [Filter] = [],
-                                      limit: UInt = ASCKit.Constants.pagingLimit) throws -> [Group] {
-
-        let resource = AscResource.listBetaGroups(filters: filters, limit: limit)
-        let result: RequestResult<[Group]> = network.syncRequest(resource: resource)
-        return try result.get()
-    }
-
     // MARK: - Apps
 
     @discardableResult
@@ -113,6 +102,13 @@ public struct ASCService {
     public static func addBetaTester(email: String,
                                      first: String,
                                      last: String, groupNames: [String]) throws {
+
+        // This will be transformed to a dependent operation once beta testers is realized as operation too
+        func listBetaGroups(filters: [Filter] = [], limit: UInt = ASCKit.Constants.pagingLimit) throws -> [Group] {
+            let resource = AscResource.listBetaGroups(filters: filters, limit: limit)
+            let result: RequestResult<[Group]> = network.syncRequest(resource: resource)
+            return try result.get()
+        }
 
         let betaGroups: Set<Group> = try groupNames
             // create filters for group names
