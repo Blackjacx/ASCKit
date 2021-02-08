@@ -42,9 +42,13 @@ extension AscResource: Resource {
             case 1: apiKey = apiKeys[0]
             default:
                 print("Please choose one of the registered API keys:")
-                apiKeys.enumerated().forEach { print("\t \($0). \($1.name) (\($1.keyId))") }
+                var options = apiKeys.enumerated().map {
+                    "\t \($0 + 1). \($1.name) (\($1.keyId))"
+                }
+                options[0].append(" <- default")
+                options.forEach { print($0) }
 
-                guard let input = readLine(), let index = Int(input), (0..<apiKeys.count).contains(index) else {
+                guard let index = readLine().map({Int($0) ?? 1 - 1}), (0..<apiKeys.count).contains(index) else {
                     throw AscError.invalidInput("Please enter the specified number of the key.")
                 }
                 apiKey = apiKeys[index]
