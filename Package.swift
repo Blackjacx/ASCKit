@@ -13,7 +13,8 @@ let package = Package(
         .library(name: "ASCKit", targets: ["ASCKit"]),
     ],
     dependencies: [
-        .package(name: "Engine", url: "https://github.com/blackjacx/engine", .branch("develop")),
+//        .package(name: "Engine", url: "https://github.com/blackjacx/engine", .branch("develop")),
+        .package(name: "Engine", path: "../Engine"),
         .package(name: "Quick", url: "https://github.com/Quick/Quick", from: "3.0.0"),
         .package(name: "Nimble", url: "https://github.com/Quick/Nimble", from: "9.0.0"),
         .package(url: "https://github.com/vapor/jwt-kit.git", from: "4.1.0"),

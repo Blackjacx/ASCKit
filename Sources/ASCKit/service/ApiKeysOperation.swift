@@ -8,7 +8,7 @@
 import Foundation
 import Engine
 
-public final class ApiKeysOperation: AsyncOperation, Command {
+public final class ApiKeysOperation: AsyncResultOperation<[ApiKey], Swift.Error> {
 
     public enum SubCommand {
         case list
@@ -19,8 +19,6 @@ public final class ApiKeysOperation: AsyncOperation, Command {
     /// Collection of registered API keys
     @Defaults("\(ProcessInfo.processId).apiKeys", defaultValue: []) private static var apiKeys: [ApiKey]
 
-    public private(set)var result: Result<[ApiKey], AscError>!
-
     private let subcommand: SubCommand  
 
     public init(_ subcommand: SubCommand) {
@@ -29,25 +27,21 @@ public final class ApiKeysOperation: AsyncOperation, Command {
 
     public override func main() {
 
-        defer {
-            self.state = .finished
-        }
-
         switch subcommand {
         case .list:
-            result = .success(Self.apiKeys)
+            finish(with: .success(Self.apiKeys))
 
         case .register(let key):
             Self.apiKeys.append(key)
-            result = .success([key])
+            finish(with: .success([key]))
 
         case .delete(let keyId):
             guard let key = Self.apiKeys.first(where: { keyId == $0.keyId }) else {
-                result = .failure(.apiKeyNotFound(keyId))
+                finish(with: .failure(AscError.apiKeyNotFound(keyId)))
                 return
             }
             Self.apiKeys = Self.apiKeys.filter { $0.keyId != keyId }
-            result = .success([key])
+            finish(with: .success([key]))
         }
     }
 }

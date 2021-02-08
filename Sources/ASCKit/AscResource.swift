@@ -9,14 +9,19 @@ import Foundation
 import Engine
 
 enum AscResource {
-    case read(url: URL, filters: [Filter])
-    case listApps(filters: [Filter])
-    case listAppStoreVersions(appId: String, filters: [Filter])
-    case listBetaGroups(filters: [Filter])
-    case listBetaTester(filters: [Filter])
+    case read(url: URL, filters: [Filter], limit: UInt)
+
+    case listApps(filters: [Filter] = [], limit: UInt)
+    case listAppStoreVersions(appId: String, filters: [Filter], limit: UInt)
+
+    case listBetaGroups(filters: [Filter], limit: UInt)
+
+    case listBetaTester(filters: [Filter], limit: UInt)
     case inviteBetaTester(testerId: String, appId: String)
     case addBetaTester(email: String, firstName: String, lastName: String, groupId: String)
     case deleteBetaTester(id: String)
+
+    case listBuilds(filters: [Filter] = [], limit: UInt)
 }
 
 extension AscResource: Resource {
@@ -54,31 +59,37 @@ extension AscResource: Resource {
 
     var path: String {
         switch self {
-        case .read(let url, _): return url.path
+        case .read(let url, _, _): return url.path
+
         case .listApps: return "/\(Self.apiVersion)/apps"
-        case .listAppStoreVersions(let appId, _): return "/\(Self.apiVersion)/apps/\(appId)/appStoreVersions"
+        case .listAppStoreVersions(let appId, _, _): return "/\(Self.apiVersion)/apps/\(appId)/appStoreVersions"
+
         case .listBetaGroups: return "/\(Self.apiVersion)/betaGroups"
+
         case .listBetaTester: return "/\(Self.apiVersion)/betaTesters"
         case .inviteBetaTester: return "/\(Self.apiVersion)/betaTesterInvitations"
         case .addBetaTester: return "/\(Self.apiVersion)/betaTesters"
         case .deleteBetaTester(let id): return "/\(Self.apiVersion)/betaTesters/\(id)"
+
+        case .listBuilds: return "/\(Self.apiVersion)/builds"
         }
     }
 
     var queryItems: [URLQueryItem] {
         switch self {
-        case .read(_, let filters): return queryItems(from: filters)
-        case .listApps(let filters): return queryItems(from: filters)
-        case .listAppStoreVersions(_, let filters): return queryItems(from: filters)
-        case .listBetaGroups(let filters): return queryItems(from: filters)
-        case .listBetaTester(let filters): return queryItems(from: filters)
+        case let .read(_, filters, limit): return queryItems(from: filters, limit: limit)
+        case let .listApps(filters, limit): return queryItems(from: filters, limit: limit)
+        case let .listAppStoreVersions(_, filters, limit): return queryItems(from: filters, limit: limit)
+        case let .listBetaGroups(filters, limit): return queryItems(from: filters, limit: limit)
+        case let .listBetaTester(filters, limit): return queryItems(from: filters, limit: limit)
+        case let .listBuilds(filters, limit): return queryItems(from: filters, limit: limit)
         default: return []
         }
     }
 
     var method: HTTPMethod {
         switch self {
-        case .read, .listBetaGroups, .listApps, .listAppStoreVersions, .listBetaTester:
+        case .read, .listBetaGroups, .listApps, .listAppStoreVersions, .listBetaTester, .listBuilds:
             return .get
         case .addBetaTester, .inviteBetaTester:
             return .post
@@ -110,7 +121,7 @@ extension AscResource: Resource {
 
     var parameters: [String : Any]? {
         switch self {
-        case .read, .listBetaGroups, .listApps, .listAppStoreVersions, .listBetaTester, .deleteBetaTester:
+        case .read, .listBetaGroups, .listApps, .listAppStoreVersions, .listBetaTester, .deleteBetaTester, .listBuilds:
             return nil
         case let .addBetaTester(email, firstName, lastName, groupId):
             return [
@@ -156,9 +167,10 @@ extension AscResource: Resource {
 
 extension AscResource {
 
-    private func queryItems(from filters: [Filter]) -> [URLQueryItem] {
-        var items: [URLQueryItem] = [URLQueryItem(name: "limit", value: "200")]
+    private func queryItems(from filters: [Filter], limit: UInt) -> [URLQueryItem] {
+        var items: [URLQueryItem] = []
         items += filters.map { URLQueryItem(name: "filter[\($0.key)]", value: $0.value) }
+        items += [URLQueryItem(name: "limit", value: "\(limit)")]
         return items
     }
 }
