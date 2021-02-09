@@ -15,15 +15,6 @@ public struct ASCService {
     // MARK: - Apps
 
     @discardableResult
-    public static func listApps(filters: [Filter] = [],
-                                limit: UInt = ASCKit.Constants.pagingLimit) throws -> [App] {
-
-        let resource = AscResource.listApps(filters: filters, limit: limit)
-        let result: RequestResult<[App]> = network.syncRequest(resource: resource)
-        return try result.get()
-    }
-
-    @discardableResult
     public static func listAppStoreVersions(appIds: [String],
                                             filters: [Filter] = [],
                                             limit: UInt = ASCKit.Constants.pagingLimit) throws -> [(app: App, versions: [AppStoreVersion])] {
@@ -54,15 +45,6 @@ public struct ASCService {
     }
 
     // MARK: - BetaTester
-
-    @discardableResult
-    public static func listBetaTester(filters: [Filter] = [],
-                                      limit: UInt = ASCKit.Constants.pagingLimit) throws -> [BetaTester] {
-
-        let resource = AscResource.listBetaTester(filters: filters, limit: limit)
-        let result: RequestResult<[BetaTester]> = network.syncRequest(resource: resource)
-        return try result.get()
-    }
 
     public static func inviteBetaTester(email: String, appIds: [String]) throws {
 
@@ -102,13 +84,6 @@ public struct ASCService {
     public static func addBetaTester(email: String,
                                      first: String,
                                      last: String, groupNames: [String]) throws {
-
-        // This will be transformed to a dependent operation once beta testers is realized as operation too
-        func listBetaGroups(filters: [Filter] = [], limit: UInt = ASCKit.Constants.pagingLimit) throws -> [Group] {
-            let resource = AscResource.listBetaGroups(filters: filters, limit: limit)
-            let result: RequestResult<[Group]> = network.syncRequest(resource: resource)
-            return try result.get()
-        }
 
         let betaGroups: Set<Group> = try groupNames
             // create filters for group names
@@ -170,6 +145,29 @@ public struct ASCService {
         if !errors.isEmpty {
             throw AscError.requestFailed(underlyingErrors: errors)
         }
+    }
+
+    // MARK: - DEPRECATED
+
+    /// This will be transformed to a dependent operation once beta testers is realized as operation too
+    static func listBetaGroups(filters: [Filter] = [], limit: UInt = ASCKit.Constants.pagingLimit) throws -> [Group] {
+        let resource = AscResource.listBetaGroups(filters: filters, limit: limit)
+        let result: RequestResult<[Group]> = network.syncRequest(resource: resource)
+        return try result.get()
+    }
+
+    /// This will be transformed to a dependent operation once beta testers is realized as operation too
+    static func listBetaTester(filters: [Filter] = [], limit: UInt = ASCKit.Constants.pagingLimit) throws -> [BetaTester] {
+        let resource = AscResource.listBetaTester(filters: filters, limit: limit)
+        let result: RequestResult<[BetaTester]> = network.syncRequest(resource: resource)
+        return try result.get()
+    }
+
+    /// This will be transformed to a dependent operation once beta testers is realized as operation too
+    static func listApps(filters: [Filter] = [], limit: UInt = ASCKit.Constants.pagingLimit) throws -> [App] {
+        let resource = AscResource.listApps(filters: filters, limit: limit)
+        let result: RequestResult<[App]> = network.syncRequest(resource: resource)
+        return try result.get()
     }
 }
 
