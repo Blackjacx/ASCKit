@@ -1,5 +1,5 @@
 //
-//  Group.swift
+//  BetaGroup.swift
 //  ASCKit
 //
 //  Created by Stefan Herold on 26.05.20.
@@ -7,26 +7,28 @@
 
 import Foundation
 
-public struct Group: Codable, Hashable, Equatable  {
-    public var type: String
+public struct BetaGroup: IdentifiableModel  {
     public var id: String
+    public var type: String
     public var attributes: Attributes
     public var relationships: Relationships
+    
+    public var name: String { attributes.name }
 }
 
-public extension Group {
+public extension BetaGroup {
 
-    struct Attributes: Codable, Hashable, Equatable {
+    struct Attributes: Model {
         public var name: String
     }
 
-    struct Relationships: Codable, Hashable, Equatable {
+    struct Relationships: Model {
         var app: Relation
         var builds: Relation
         var betaTesters: Relation
     }
 
-    enum FilterKey: String, Codable {
+    enum FilterKey: String, Model {
         case apps
         case builds
         case id
@@ -37,7 +39,7 @@ public extension Group {
     }
 }
 
-public extension Array where Element == Group {
+public extension Array where Element == BetaGroup {
 
     func out(_ attribute: String?) {
         switch attribute {
@@ -46,8 +48,4 @@ public extension Array where Element == Group {
         default: out()
         }
     }
-}
-
-extension Group: Model {
-    public var name: String { attributes.name }
 }

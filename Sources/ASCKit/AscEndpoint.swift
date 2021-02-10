@@ -1,0 +1,235 @@
+//
+//  AscEndpoint.swift
+//  ASCKit
+//
+//  Created by Stefan Herold on 27.05.20.
+//
+
+import Foundation
+import Engine
+
+private var apiKey: ApiKey?
+private let apiVersion: String = "v1"
+private let baseUrlPath = "api.appstoreconnect.apple.com"
+
+enum AscGenericEndpoint<M: Model> {
+    case list(type: M.Type, filters: [Filter], limit: UInt)
+}
+
+extension AscGenericEndpoint: Endpoint {
+
+    var host: String {
+        baseUrlPath
+    }
+
+    var port: Int? {
+        nil
+    }
+
+    var path: String {
+        switch self {
+        /// For the URL path the following algorithm is used:
+        /// - (Singular) Model name -> lowercase 1st letter -> append an 's' to make it plural
+        /// This yields the path name of the model and saves  lot of typing.
+        case .list(let type, _, _): return "/\(apiVersion)/\(String(describing: type.self).lowercasedFirst())s"
+        }
+    }
+
+    var queryItems: [URLQueryItem] {
+        switch self {
+        case let .list(_, filters, limit): return queryItems(from: filters, limit: limit)
+        }
+    }
+
+    var method: HTTPMethod {
+        switch self {
+        case .list: return .get
+        }
+    }
+
+    var headers: [String : String]? {
+        var headers: [String: String] = [
+            "Content-Type": "application/json",
+        ]
+
+        if shouldAuthorize {
+            do {
+                let token = try determineToken()
+                headers["Authorization"] = "Bearer \(token)"
+            } catch {
+                print(error)
+            }
+        }
+        return headers
+    }
+
+    var parameters: [String : Any]? {
+        nil
+    }
+
+    var shouldAuthorize: Bool {
+        true
+    }
+
+    func jsonDecode<T: Decodable>(_ type: T.Type, from data: Data) throws -> T {
+        try Json.decoder.decode(DataWrapper<T>.self, from: data).object
+    }
+}
+
+enum AscEndpoint {
+    case read(url: URL, filters: [Filter], limit: UInt)
+
+    case listAppStoreVersions(appId: String, filters: [Filter], limit: UInt)
+
+    case inviteBetaTester(testerId: String, appId: String)
+    case addBetaTester(email: String, firstName: String, lastName: String, groupId: String)
+    case deleteBetaTester(id: String)
+}
+
+extension AscEndpoint: Endpoint {
+
+    var host: String {
+        baseUrlPath
+    }
+
+    var port: Int? {
+        nil
+    }
+
+    var path: String {
+        switch self {
+        case .read(let url, _, _): return url.path
+        case .listAppStoreVersions(let appId, _, _): return "/\(apiVersion)/apps/\(appId)/appStoreVersions"
+
+        case .inviteBetaTester: return "/\(apiVersion)/betaTesterInvitations"
+        case .addBetaTester: return "/\(apiVersion)/betaTesters"
+        case .deleteBetaTester(let id): return "/\(apiVersion)/betaTesters/\(id)"
+        }
+    }
+
+    var queryItems: [URLQueryItem] {
+        switch self {
+        case let .read(_, filters, limit): return queryItems(from: filters, limit: limit)
+        case let .listAppStoreVersions(_, filters, limit): return queryItems(from: filters, limit: limit)
+        default: return []
+        }
+    }
+
+    var method: HTTPMethod {
+        switch self {
+        case .read, .listAppStoreVersions:
+            return .get
+        case .addBetaTester, .inviteBetaTester:
+            return .post
+        case .deleteBetaTester:
+            return .delete
+        }
+    }
+
+    var shouldAuthorize: Bool {
+        true
+    }
+
+    var headers: [String : String]? {
+
+        var headers: [String: String] = [
+            "Content-Type": "application/json",
+        ]
+
+        if shouldAuthorize {
+            do {
+                let token = try determineToken()
+                headers["Authorization"] = "Bearer \(token)"
+            } catch {
+                print(error)
+            }
+        }
+        return headers
+    }
+
+    var parameters: [String : Any]? {
+        switch self {
+        case .read, .listAppStoreVersions, .deleteBetaTester:
+            return nil
+        case let .addBetaTester(email, firstName, lastName, groupId):
+            return [
+                "data": [
+                    "type": "betaTesters",
+                    "attributes": [
+                        "email": email,
+                        "firstName": firstName,
+                        "lastName": lastName,
+                    ],
+                    "relationships": [
+                        "betaGroups": [
+                            "data": [
+                                [ "type": "betaGroups", "id": groupId ]
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        case let .inviteBetaTester(testerId, appId):
+            return [
+                "data": [
+                    "type": "betaTesterInvitations",
+                    "relationships": [
+                        "app": [
+                            "data": [
+                                "type": "apps",
+                                "id": appId,
+                            ]
+                        ],
+                        "betaTester": [
+                            "data": [
+                                "type": "betaTesters",
+                                "id": testerId,
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        }
+    }
+
+    func jsonDecode<T: Decodable>(_ type: T.Type, from data: Data) throws -> T {
+        try Json.decoder.decode(DataWrapper<T>.self, from: data).object
+    }
+}
+
+extension Endpoint {
+
+    func queryItems(from filters: [Filter], limit: UInt) -> [URLQueryItem] {
+        var items: [URLQueryItem] = []
+        items += filters.map { URLQueryItem(name: "filter[\($0.key)]", value: $0.value) }
+        items += [URLQueryItem(name: "limit", value: "\(limit)")]
+        return items
+    }
+
+    func determineToken() throws -> String {
+
+        if apiKey == nil {
+            let op = ApiKeysOperation(.list)
+            op.executeSync()
+            let apiKeys = try op.result.get()
+
+            switch apiKeys.count {
+            case 0: throw AscError.noApiKeysSpecified
+            case 1: apiKey = apiKeys[0]
+            default:
+                print("Please choose one of the registered API keys:")
+                var options = apiKeys.enumerated().map {
+                    "\t \($0 + 1). \($1.name) (\($1.keyId))"
+                }
+                options[0].append(" <- default")
+                options.forEach { print($0) }
+
+                guard let index = readLine().map({(Int($0) ?? 1) - 1}), (0..<apiKeys.count).contains(index) else {
+                    throw AscError.invalidInput("Please enter the specified number of the key.")
+                }
+                apiKey = apiKeys[index]
+            }
+        }
+        return try JSONWebToken.create(keyFile: apiKey!.path, kid: apiKey!.keyId, iss: apiKey!.issuerId)
+    }
+}

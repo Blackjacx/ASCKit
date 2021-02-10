@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct App: Codable {
+public struct App {
     public var type: String
     public var id: String
     public var attributes: Attributes
@@ -16,14 +16,14 @@ public struct App: Codable {
 
 public extension App {
 
-    struct Attributes: Codable {
+    struct Attributes: Model {
         public var name: String
         public var bundleId: String
         public var sku: String
         public var primaryLocale: String
     }
 
-    struct Relationships: Codable {
+    struct Relationships: Model {
         var betaGroups: Relation
         var preReleaseVersions: Relation
         var betaAppLocalizations: Relation
@@ -32,7 +32,7 @@ public extension App {
         var betaAppReviewDetail: Relation
     }
 
-    enum FilterKey: String, Codable {
+    enum FilterKey: String, Model {
         case bundleId
         case id
         case name
@@ -61,6 +61,6 @@ public extension Array where Element == App {
     }
 }
 
-extension App: Model {
+extension App: IdentifiableModel {
     public var name: String { attributes.name }
 }

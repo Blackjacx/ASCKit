@@ -7,7 +7,8 @@
 
 import Foundation
 
-public struct ApiKey: Codable {
+public struct ApiKey {
+    public var id: String = UUID().uuidString
     public var name: String
     public var path: String
     public var keyId: String
@@ -20,3 +21,5 @@ public struct ApiKey: Codable {
         self.issuerId = issuerId
     }
 }
+
+extension ApiKey: IdentifiableModel {}

@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct Build: Codable {
+public struct Build {
     public var type: String
     public var id: String
     public var attributes: Attributes
@@ -16,14 +16,14 @@ public struct Build: Codable {
 
 public extension Build {
 
-    enum ProcessingState: String, Codable {
+    enum ProcessingState: String, Model {
         case processing = "PROCESSING"
         case failed = "FAILED"
         case invalid = "INVALID"
         case valid = "VALID"
     }
 
-    struct Attributes: Codable {
+    struct Attributes: Model {
         public var expired: Bool
         public var minOsVersion: String
         public var processingState: ProcessingState
@@ -33,7 +33,7 @@ public extension Build {
         public var expirationDate: Date
     }
 
-    struct Relationships: Codable {
+    struct Relationships: Model {
         var app: Relation
         var appEncryptionDeclaration: Relation
         var individualTesters: Relation
@@ -45,7 +45,7 @@ public extension Build {
         var icons: Relation
     }
 
-    enum FilterKey: String, Codable {
+    enum FilterKey: String, Model {
         case app
         case expired
         case id
@@ -80,6 +80,6 @@ public extension Array where Element == Build {
     }
 }
 
-extension Build: Model {
+extension Build: IdentifiableModel {
     public var name: String { attributes.version }
 }

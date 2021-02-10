@@ -7,7 +7,11 @@
 
 import Foundation
 
-struct BetaTesterInvitationResponse: Codable {
+struct BetaTesterInvitationResponse: Model {
     var id: String
     var type: String
+}
+
+extension BetaTesterInvitationResponse: IdentifiableModel {
+    public var name: String { "" }
 }

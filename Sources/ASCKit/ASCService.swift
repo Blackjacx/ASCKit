@@ -25,8 +25,8 @@ public struct ASCService {
         var errors: [Error] = []
 
         for id in iterableAppIds {
-            let resource = AscResource.listAppStoreVersions(appId: id, filters: filters, limit: limit)
-            let result: RequestResult<[AppStoreVersion]> = network.syncRequest(resource: resource)
+            let endpoint = AscEndpoint.listAppStoreVersions(appId: id, filters: filters, limit: limit)
+            let result: RequestResult<[AppStoreVersion]> = network.syncRequest(endpoint: endpoint)
 
             switch result {
             case let .success(versions):
@@ -62,8 +62,8 @@ public struct ASCService {
         var errors: [Error] = []
 
         for id in iterableAppIds {
-            let resource = AscResource.inviteBetaTester(testerId: tester.id, appId: id)
-            let result: RequestResult<BetaTesterInvitationResponse> = network.syncRequest(resource: resource)
+            let endpoint = AscEndpoint.inviteBetaTester(testerId: tester.id, appId: id)
+            let result: RequestResult<BetaTesterInvitationResponse> = network.syncRequest(endpoint: endpoint)
             let app = apps.filter { id == $0.id }[0]
 
             switch result {
@@ -85,9 +85,9 @@ public struct ASCService {
                                      first: String,
                                      last: String, groupNames: [String]) throws {
 
-        let betaGroups: Set<Group> = try groupNames
+        let betaGroups: Set<BetaGroup> = try groupNames
             // create filters for group names
-            .map({ Filter(key: Group.FilterKey.name, value: $0) })
+            .map({ Filter(key: BetaGroup.FilterKey.name, value: $0) })
             // union of groups of different names
             .reduce([], { $0.union(try listBetaGroups(filters: [$1])) })
 
@@ -95,8 +95,8 @@ public struct ASCService {
         var errors: [Error] = []
 
         for id in betaGroups.map(\.id) {
-            let resource = AscResource.addBetaTester(email: email, firstName: first, lastName: last, groupId: id)
-            let result: RequestResult<BetaTester> = network.syncRequest(resource: resource)
+            let endpoint = AscEndpoint.addBetaTester(email: email, firstName: first, lastName: last, groupId: id)
+            let result: RequestResult<BetaTester> = network.syncRequest(endpoint: endpoint)
 
             switch result {
             case let .success(result):
@@ -129,8 +129,8 @@ public struct ASCService {
         var errors: [Error] = []
 
         for tester in foundTesters {
-            let resource = AscResource.deleteBetaTester(id: tester.id)
-            let result: RequestResult<EmptyResponse> = network.syncRequest(resource: resource)
+            let endpoint = AscEndpoint.deleteBetaTester(id: tester.id)
+            let result: RequestResult<EmptyResponse> = network.syncRequest(endpoint: endpoint)
 
             switch result {
             case let .success(result):
@@ -150,30 +150,23 @@ public struct ASCService {
     // MARK: - DEPRECATED
 
     /// This will be transformed to a dependent operation once beta testers is realized as operation too
-    static func listBetaGroups(filters: [Filter] = [], limit: UInt = ASCKit.Constants.pagingLimit) throws -> [Group] {
-        let resource = AscResource.listBetaGroups(filters: filters, limit: limit)
-        let result: RequestResult<[Group]> = network.syncRequest(resource: resource)
+    static func listBetaGroups(filters: [Filter] = [], limit: UInt = ASCKit.Constants.pagingLimit) throws -> [BetaGroup] {
+        let endpoint = AscGenericEndpoint.list(type: BetaGroup.self, filters: filters, limit: limit)
+        let result: RequestResult<[BetaGroup]> = network.syncRequest(endpoint: endpoint)
         return try result.get()
     }
 
     /// This will be transformed to a dependent operation once beta testers is realized as operation too
     static func listBetaTester(filters: [Filter] = [], limit: UInt = ASCKit.Constants.pagingLimit) throws -> [BetaTester] {
-        let resource = AscResource.listBetaTester(filters: filters, limit: limit)
-        let result: RequestResult<[BetaTester]> = network.syncRequest(resource: resource)
+        let endpoint = AscGenericEndpoint.list(type: BetaTester.self, filters: filters, limit: limit)
+        let result: RequestResult<[BetaTester]> = network.syncRequest(endpoint: endpoint)
         return try result.get()
     }
 
     /// This will be transformed to a dependent operation once beta testers is realized as operation too
     static func listApps(filters: [Filter] = [], limit: UInt = ASCKit.Constants.pagingLimit) throws -> [App] {
-        let resource = AscResource.listApps(filters: filters, limit: limit)
-        let result: RequestResult<[App]> = network.syncRequest(resource: resource)
+        let endpoint = AscGenericEndpoint.list(type: App.self, filters: filters, limit: limit)
+        let result: RequestResult<[App]> = network.syncRequest(endpoint: endpoint)
         return try result.get()
-    }
-}
-
-extension ASCService: Service {
-
-    public func jsonDecode<T: Decodable>(_ type: T.Type, from data: Data) throws -> T {
-        try Json.decoder.decode(DataWrapper<T>.self, from: data).object
     }
 }

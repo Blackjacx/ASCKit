@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct AppStoreVersion: Codable {
+public struct AppStoreVersion {
     public var type: String
     public var id: String
     public var attributes: Attributes
@@ -16,7 +16,7 @@ public struct AppStoreVersion: Codable {
 
 public extension AppStoreVersion {
 
-    enum State: String, Codable {
+    enum State: String, Model {
         case developerRemovedFromSale = "DEVELOPER_REMOVED_FROM_SALE"
         case developerRejected = "DEVELOPER_REJECTED"
         case inReview = "IN_REVIEW"
@@ -36,7 +36,7 @@ public extension AppStoreVersion {
         case replacedWithNewVersion = "REPLACED_WITH_NEW_VERSION"
     }
     
-    struct Attributes: Codable {
+    struct Attributes: Model {
         public var platform: String
         public var versionString: String
         public var appStoreState: State
@@ -44,7 +44,7 @@ public extension AppStoreVersion {
         public var createdDate: Date
     }
 
-    struct Relationships: Codable {
+    struct Relationships: Model {
 //        var betaGroups: Relation
 //        var preReleaseVersions: Relation
 //        var betaAppLocalizations: Relation
@@ -64,6 +64,6 @@ public extension Array where Element == AppStoreVersion {
     }
 }
 
-extension AppStoreVersion: Model {
+extension AppStoreVersion: IdentifiableModel {
     public var name: String { "" }
 }

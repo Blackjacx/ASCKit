@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct BetaTester: Codable {
+public struct BetaTester {
     public var type: String
     public var id: String
     public var attributes: Attributes
@@ -16,20 +16,20 @@ public struct BetaTester: Codable {
 
 public extension BetaTester {
 
-    struct Attributes: Codable {
+    struct Attributes: Model {
         public var firstName: String? = ""
         public var lastName: String? = ""
         public var email: String? = ""
         public var inviteType: InviteType
     }
 
-    struct Relationships: Codable {
+    struct Relationships: Codable, Hashable, Equatable {
         var apps: Relation
         var betaGroups: Relation
         var builds: Relation
     }
 
-    enum FilterKey: String, Codable {
+    enum FilterKey: String, Model {
         case apps
         case betaGroups
         case builds
@@ -55,11 +55,9 @@ public extension Array where Element == BetaTester {
     }
 }
 
-extension BetaTester: Model {
+extension BetaTester: IdentifiableModel {
 
     public var name: String {
-        [attributes.firstName, attributes.lastName]
-            .compactMap { $0 }
-            .joined(separator: " ")
+        [attributes.firstName, attributes.lastName].compactMap { $0 }.joined(separator: " ")
     }
 }

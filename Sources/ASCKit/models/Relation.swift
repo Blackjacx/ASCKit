@@ -7,11 +7,11 @@
 
 import Foundation
 
-struct Relation: Codable, Hashable, Equatable {
+struct Relation: Model {
     var links: Links
 }
 
-struct Links: Codable, Hashable, Equatable {
+struct Links: Model {
     var related: URL
     var `self`: URL
 }
