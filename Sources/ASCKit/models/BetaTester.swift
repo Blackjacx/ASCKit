@@ -16,6 +16,11 @@ public struct BetaTester {
 
 public extension BetaTester {
 
+    enum InviteType: String, CaseIterable, Model {
+        case email = "EMAIL"
+        case publicLink = "PUBLIC_LINK"
+    }
+
     struct Attributes: Model {
         public var firstName: String? = ""
         public var lastName: String? = ""

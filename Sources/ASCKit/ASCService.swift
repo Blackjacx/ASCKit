@@ -17,7 +17,7 @@ public struct ASCService {
     @discardableResult
     public static func listAppStoreVersions(appIds: [String],
                                             filters: [Filter] = [],
-                                            limit: UInt = ASCKit.Constants.pagingLimit) throws -> [(app: App, versions: [AppStoreVersion])] {
+                                            limit: UInt? = nil) throws -> [(app: App, versions: [AppStoreVersion])] {
 
         let apps = try listApps()
         let iterableAppIds = appIds.count > 0 ? appIds : apps.map({ $0.id })
@@ -129,7 +129,7 @@ public struct ASCService {
         var errors: [Error] = []
 
         for tester in foundTesters {
-            let endpoint = AscEndpoint.deleteBetaTester(id: tester.id)
+            let endpoint = AscGenericEndpoint.delete(type: BetaTester.self, id: tester.id)
             let result: RequestResult<EmptyResponse> = network.syncRequest(endpoint: endpoint)
 
             switch result {
@@ -150,22 +150,22 @@ public struct ASCService {
     // MARK: - DEPRECATED
 
     /// This will be transformed to a dependent operation once beta testers is realized as operation too
-    static func listBetaGroups(filters: [Filter] = [], limit: UInt = ASCKit.Constants.pagingLimit) throws -> [BetaGroup] {
-        let endpoint = AscGenericEndpoint.list(type: BetaGroup.self, filters: filters, limit: limit)
+    static func listBetaGroups(filters: [Filter] = []) throws -> [BetaGroup] {
+        let endpoint = AscGenericEndpoint.list(type: BetaGroup.self, filters: filters, limit: nil)
         let result: RequestResult<[BetaGroup]> = network.syncRequest(endpoint: endpoint)
         return try result.get()
     }
 
     /// This will be transformed to a dependent operation once beta testers is realized as operation too
-    static func listBetaTester(filters: [Filter] = [], limit: UInt = ASCKit.Constants.pagingLimit) throws -> [BetaTester] {
-        let endpoint = AscGenericEndpoint.list(type: BetaTester.self, filters: filters, limit: limit)
+    static func listBetaTester(filters: [Filter] = []) throws -> [BetaTester] {
+        let endpoint = AscGenericEndpoint.list(type: BetaTester.self, filters: filters, limit: nil)
         let result: RequestResult<[BetaTester]> = network.syncRequest(endpoint: endpoint)
         return try result.get()
     }
 
     /// This will be transformed to a dependent operation once beta testers is realized as operation too
-    static func listApps(filters: [Filter] = [], limit: UInt = ASCKit.Constants.pagingLimit) throws -> [App] {
-        let endpoint = AscGenericEndpoint.list(type: App.self, filters: filters, limit: limit)
+    static func listApps(filters: [Filter] = []) throws -> [App] {
+        let endpoint = AscGenericEndpoint.list(type: App.self, filters: filters, limit: nil)
         let result: RequestResult<[App]> = network.syncRequest(endpoint: endpoint)
         return try result.get()
     }

@@ -15,9 +15,9 @@ public final class ListOperation<M: Model>: AsyncResultOperation<[M], Network.Er
     let network = Network()
 
     let filters: [Filter]
-    let limit: UInt
+    let limit: UInt?
 
-    public init(filters: [Filter] = [], limit: UInt = ASCKit.Constants.pagingLimit) {
+    public init(filters: [Filter] = [], limit: UInt? = nil) {
         self.filters = filters
         self.limit = limit
     }

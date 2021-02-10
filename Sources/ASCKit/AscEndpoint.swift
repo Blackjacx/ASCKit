@@ -13,7 +13,8 @@ private let apiVersion: String = "v1"
 private let baseUrlPath = "api.appstoreconnect.apple.com"
 
 enum AscGenericEndpoint<M: Model> {
-    case list(type: M.Type, filters: [Filter], limit: UInt)
+    case list(type: M.Type, filters: [Filter], limit: UInt?)
+    case delete(type: M.Type, id: String)
 }
 
 extension AscGenericEndpoint: Endpoint {
@@ -32,11 +33,13 @@ extension AscGenericEndpoint: Endpoint {
         /// - (Singular) Model name -> lowercase 1st letter -> append an 's' to make it plural
         /// This yields the path name of the model and saves  lot of typing.
         case .list(let type, _, _): return "/\(apiVersion)/\(String(describing: type.self).lowercasedFirst())s"
+        case .delete(let type, let id): return "/\(apiVersion)/\(String(describing: type.self).lowercasedFirst())s/\(id)"
         }
     }
 
     var queryItems: [URLQueryItem] {
         switch self {
+        case .delete: return []
         case let .list(_, filters, limit): return queryItems(from: filters, limit: limit)
         }
     }
@@ -44,6 +47,7 @@ extension AscGenericEndpoint: Endpoint {
     var method: HTTPMethod {
         switch self {
         case .list: return .get
+        case .delete: return .delete
         }
     }
 
@@ -79,11 +83,12 @@ extension AscGenericEndpoint: Endpoint {
 enum AscEndpoint {
     case read(url: URL, filters: [Filter], limit: UInt)
 
-    case listAppStoreVersions(appId: String, filters: [Filter], limit: UInt)
+    case listAppStoreVersions(appId: String, filters: [Filter], limit: UInt?)
 
     case inviteBetaTester(testerId: String, appId: String)
     case addBetaTester(email: String, firstName: String, lastName: String, groupId: String)
-    case deleteBetaTester(id: String)
+
+    case registerBundleId(attributes: BundleId.Attributes)
 }
 
 extension AscEndpoint: Endpoint {
@@ -103,7 +108,8 @@ extension AscEndpoint: Endpoint {
 
         case .inviteBetaTester: return "/\(apiVersion)/betaTesterInvitations"
         case .addBetaTester: return "/\(apiVersion)/betaTesters"
-        case .deleteBetaTester(let id): return "/\(apiVersion)/betaTesters/\(id)"
+
+        case .registerBundleId: return "/\(apiVersion)/bundleIds"
         }
     }
 
@@ -119,10 +125,8 @@ extension AscEndpoint: Endpoint {
         switch self {
         case .read, .listAppStoreVersions:
             return .get
-        case .addBetaTester, .inviteBetaTester:
+        case .addBetaTester, .inviteBetaTester, .registerBundleId:
             return .post
-        case .deleteBetaTester:
-            return .delete
         }
     }
 
@@ -149,7 +153,7 @@ extension AscEndpoint: Endpoint {
 
     var parameters: [String : Any]? {
         switch self {
-        case .read, .listAppStoreVersions, .deleteBetaTester:
+        case .read, .listAppStoreVersions:
             return nil
         case let .addBetaTester(email, firstName, lastName, groupId):
             return [
@@ -189,6 +193,23 @@ extension AscEndpoint: Endpoint {
                     ]
                 ]
             ]
+        case let .registerBundleId(bundleIdAttributes):
+            var attributes: [String: Any] = [
+                "identifier": bundleIdAttributes.identifier,
+                "name": bundleIdAttributes.name,
+                "platform": bundleIdAttributes.platform.rawValue
+            ]
+
+            if let seedId = bundleIdAttributes.seedId {
+                attributes["seedId"] = seedId
+            }
+
+            return [
+                "data": [
+                    "type": "bundleIds",
+                    "attributes": attributes
+                ]
+            ]
         }
     }
 
@@ -199,10 +220,10 @@ extension AscEndpoint: Endpoint {
 
 extension Endpoint {
 
-    func queryItems(from filters: [Filter], limit: UInt) -> [URLQueryItem] {
+    func queryItems(from filters: [Filter], limit: UInt?) -> [URLQueryItem] {
         var items: [URLQueryItem] = []
         items += filters.map { URLQueryItem(name: "filter[\($0.key)]", value: $0.value) }
-        items += [URLQueryItem(name: "limit", value: "\(limit)")]
+        items += [URLQueryItem(name: "limit", value: "\(limit ?? Constants.maxPageSize)")]
         return items
     }
 

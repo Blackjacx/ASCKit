@@ -8,5 +8,5 @@
 import Foundation
 
 public enum Constants {
-    public static let pagingLimit: UInt = 200
+    public static let maxPageSize: UInt = 200
 }
