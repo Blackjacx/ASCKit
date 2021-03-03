@@ -76,7 +76,7 @@ extension AscGenericEndpoint: Endpoint {
     }
 
     func jsonDecode<T: Decodable>(_ type: T.Type, from data: Data) throws -> T {
-        try Json.decoder.decode(DataWrapper<T>.self, from: data).object
+        try Json.decoder.decode(DataWrapper<T>.self, from: data).data
     }
 }
 
@@ -214,7 +214,7 @@ extension AscEndpoint: Endpoint {
     }
 
     func jsonDecode<T: Decodable>(_ type: T.Type, from data: Data) throws -> T {
-        try Json.decoder.decode(DataWrapper<T>.self, from: data).object
+        try Json.decoder.decode(DataWrapper<T>.self, from: data).data
     }
 }
 
