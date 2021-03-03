@@ -10,7 +10,7 @@ import Engine
 
 public final class RegisterBundleIdOperation: AsyncResultOperation<BundleId, Network.Error> {
 
-    #warning("make global singletom from network")
+    #warning("make global singleton from network")
     let network = Network()
 
     let attributes: BundleId.Attributes

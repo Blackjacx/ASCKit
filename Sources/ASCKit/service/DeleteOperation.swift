@@ -11,7 +11,7 @@ import Engine
 /// Lists all instances of the given model
 public final class DeleteOperation<M: IdentifiableModel>: AsyncResultOperation<EmptyResponse, Network.Error> {
 
-    #warning("make global singletom from network")
+    #warning("make global singleton from network")
     let network = Network()
 
     let model: M

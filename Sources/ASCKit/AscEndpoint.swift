@@ -12,6 +12,7 @@ private let apiVersion: String = "v1"
 private let baseUrlPath = "api.appstoreconnect.apple.com"
 
 enum AscGenericEndpoint<M: Model> {
+    case url(_ url: URL, type: M.Type)
     case list(type: M.Type, filters: [Filter], limit: UInt?)
     case delete(type: M.Type, id: String)
 }
@@ -31,6 +32,13 @@ enum AscEndpoint {
 
 extension AscGenericEndpoint: Endpoint {
 
+    var url: URL? {
+        switch self {
+        case .url(let url, _): return url
+        default: return nil
+        }
+    }
+
     var host: String {
         baseUrlPath
     }
@@ -40,25 +48,37 @@ extension AscGenericEndpoint: Endpoint {
     }
 
     var path: String {
+        let type: M.Type
+        var pathSuffix: String?
+
         switch self {
-        /// For the URL path the following algorithm is used:
-        /// - (Singular) Model name -> lowercase 1st letter -> append an 's' to make it plural
-        /// This yields the path name of the model and saves  lot of typing.
-        case .list(let type, _, _): return "/\(apiVersion)/\(String(describing: type.self).lowercasedFirst())s"
-        case .delete(let type, let id): return "/\(apiVersion)/\(String(describing: type.self).lowercasedFirst())s/\(id)"
+        case .url: return ""
+        case .list(let t, _, _): type = t
+        case .delete(let t, let id): type = t; pathSuffix = id
         }
+
+        /// For the URL path the following algorithm is used:
+        /// - (Singular) Model name -> lowercase 1st letter -> append an 's' to pluralize it
+        /// This yields the path name of the model and saves  lot of typing.
+        let base = "/\(apiVersion)/\(String(describing: type.self).lowercasedFirst())s"
+
+        guard let suffix = pathSuffix else {
+            return base
+        }
+        return base.appendPathComponent(suffix)
     }
 
     var queryItems: [URLQueryItem] {
         switch self {
-        case .delete: return []
+        case .url: return []
         case let .list(_, filters, limit): return queryItems(from: filters, limit: limit)
+        case .delete: return []
         }
     }
 
     var method: HTTPMethod {
         switch self {
-        case .list: return .get
+        case .url, .list: return .get
         case .delete: return .delete
         }
     }
@@ -87,8 +107,23 @@ extension AscGenericEndpoint: Endpoint {
         true
     }
 
-    func jsonDecode<T: Decodable>(_ type: T.Type, from data: Data) throws -> T {
-        try Json.decoder.decode(DataWrapper<T>.self, from: data).data
+    func jsonDecode<T>(_ type: T.Type, from data: Data) throws -> T where T: Decodable {
+        switch self {
+        case .url, .list:
+            let directResult = Result { try Json.decoder.decode(T.self, from: data) }
+
+            guard (try? directResult.get()) != nil else {
+                // Decode data-wrapped result, e.g. [BetaTester]
+                return try Json.decoder.decode(DataWrapper<T>.self, from: data).data
+            }
+
+            // Extract data wrapped model, e.g. PageableModel<BetaTester>, or throw the error
+            return try directResult.get()
+
+        case .delete:
+            // Decode result directly since we always use EmptyResponse here
+            return try Json.decoder.decode(T.self, from: data)
+        }
     }
 }
 
@@ -96,6 +131,10 @@ extension AscEndpoint: Endpoint {
 
     /// Used o specify the id of an already registered key to use
     public static var apiKeyId: String?
+
+    var url: URL? {
+        return nil
+    }
 
     var host: String {
         baseUrlPath

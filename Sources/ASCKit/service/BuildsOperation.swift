@@ -11,14 +11,13 @@ import Engine
 public final class BuildsOperation: AsyncResultOperation<[Build], Network.Error> {
 
     public enum SubCommand {
-        case list(filters: [Filter], limit: UInt? = nil)
         case expire(ids: [String])
     }
 
     #warning("make global singletom from network")
     let network = Network()
 
-    private let subcommand: SubCommand  
+    private let subcommand: SubCommand
 
     public init(_ subcommand: SubCommand) {
         self.subcommand = subcommand
@@ -27,11 +26,6 @@ public final class BuildsOperation: AsyncResultOperation<[Build], Network.Error>
     public override func main() {
 
         switch subcommand {
-        case let .list(filters, limit):
-            let op = ListOperation<Build>(filters: filters, limit: limit)
-            op.executeSync()
-            finish(with: op.result)
-
         case let .expire(ids):
             let filters: [Filter]
             if ids.isEmpty {
@@ -39,13 +33,14 @@ public final class BuildsOperation: AsyncResultOperation<[Build], Network.Error>
             } else {
                 filters = ids.map { Filter(key: Build.FilterKey.id, value: $0) }
             }
-            let list = ListOperation<Build>(filters: filters)
+            #warning("This doesn't load all builds due to paging limit")
+            let list = ListOperation<PageableModel<Build>>(filters: filters)
             list.executeSync()
             guard let receivedBuilds = try? list.result.get() else {
-                finish(with: list.result)
+                finish(with: list.result.map { $0.data })
                 return
             }
-            let builds = receivedBuilds
+            let builds = receivedBuilds.data
 
             guard !builds.isEmpty else {
                 #warning("inform the user via PROPER error when no builds have been found")

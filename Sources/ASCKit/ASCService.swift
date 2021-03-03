@@ -114,6 +114,13 @@ public struct ASCService {
 
     // MARK: - DEPRECATED
 
+    #warning("""
+        Don't forget to re-write AscGenericEndpoint.jsonDecode(...) when using operations for all calls above. We don't
+        use AscGenericEndpoint.list then directly anymore (like below) - just via the ListOperation so we can be sure
+        to get a PageableModel result then.
+    """)
+
+
     /// This will be transformed to a dependent operation once beta testers is realized as operation too
     static func listBetaGroups(filters: [Filter] = []) throws -> [BetaGroup] {
         let endpoint = AscGenericEndpoint.list(type: BetaGroup.self, filters: filters, limit: nil)
