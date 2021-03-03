@@ -7,11 +7,13 @@
 
 import Foundation
 
-public struct Build {
-    public var type: String
+public struct Build: IdentifiableModel {
     public var id: String
+    public var type: String
     public var attributes: Attributes
     public var relationships: Relationships
+
+    public var name: String { attributes.version }
 }
 
 public extension Build {
@@ -78,8 +80,4 @@ public extension Array where Element == Build {
         default: out()
         }
     }
-}
-
-extension Build: IdentifiableModel {
-    public var name: String { attributes.version }
 }

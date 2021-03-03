@@ -7,11 +7,13 @@
 
 import Foundation
 
-public struct App {
-    public var type: String
+public struct App: IdentifiableModel {
     public var id: String
+    public var type: String
     public var attributes: Attributes
     public var relationships: Relationships
+
+    public var name: String { attributes.name }
 }
 
 public extension App {
@@ -59,8 +61,4 @@ public extension Array where Element == App {
         default: out()
         }
     }
-}
-
-extension App: IdentifiableModel {
-    public var name: String { attributes.name }
 }

@@ -9,21 +9,24 @@ import Foundation
 import Engine
 
 /// Lists all instances of the given model
-public final class DeleteOperation<M: Model>: AsyncResultOperation<EmptyResponse, Network.Error> {
+public final class DeleteOperation<M: IdentifiableModel>: AsyncResultOperation<EmptyResponse, Network.Error> {
 
     #warning("make global singletom from network")
     let network = Network()
 
-    let id: String
+    let model: M
 
-    public init(id: String) {
-        self.id = id
+    public init(model: M) {
+        self.model = model
     }
 
     public override func main() {
-        let endpoint = AscGenericEndpoint.delete(type: M.self, id: id)
+        let endpoint = AscGenericEndpoint.delete(type: M.self, id: model.id)
         network.request(endpoint: endpoint) { [weak self] (result: RequestResult<EmptyResponse>) in
-            self?.finish(with: result)
+            defer { self?.finish(with: result) }
+            guard let self = self else { return }
+            guard case .success = result else { return }
+            print("Successfully removed \(M.self).\(self.model.id)")
         }
     }
 }

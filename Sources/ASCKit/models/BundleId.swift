@@ -7,11 +7,13 @@
 
 import Foundation
 
-public struct BundleId {
-    public var type: String
+public struct BundleId: IdentifiableModel {
     public var id: String
+    public var type: String
     public var attributes: Attributes
     public var relationships: Relationships
+
+    public var name: String { attributes.name }
 }
 
 public extension BundleId {
@@ -56,12 +58,5 @@ public extension Array where Element == BundleId {
         case "seedid": out(\.attributes.seedId, attribute: attribute)
         default: out()
         }
-    }
-}
-
-extension BundleId: IdentifiableModel {
-
-    public var name: String {
-        attributes.name
     }
 }

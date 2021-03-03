@@ -7,11 +7,13 @@
 
 import Foundation
 
-public struct AppStoreVersion {
-    public var type: String
+public struct AppStoreVersion: IdentifiableModel {
     public var id: String
+    public var type: String
     public var attributes: Attributes
     public var relationships: Relationships
+
+    public var name: String { "" }
 }
 
 public extension AppStoreVersion {
@@ -62,8 +64,4 @@ public extension Array where Element == AppStoreVersion {
         default: out()
         }
     }
-}
-
-extension AppStoreVersion: IdentifiableModel {
-    public var name: String { "" }
 }

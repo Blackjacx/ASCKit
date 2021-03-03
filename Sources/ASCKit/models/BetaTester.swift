@@ -7,11 +7,15 @@
 
 import Foundation
 
-public struct BetaTester {
-    public var type: String
+public struct BetaTester: IdentifiableModel {
     public var id: String
+    public var type: String
     public var attributes: Attributes
     public var relationships: Relationships
+
+    public var name: String {
+        [attributes.firstName, attributes.lastName].compactMap { $0 }.joined(separator: " ")
+    }
 }
 
 public extension BetaTester {
@@ -57,12 +61,5 @@ public extension Array where Element == BetaTester {
         case "email": out(\.attributes.email, attribute: attribute)
         default: out()
         }
-    }
-}
-
-extension BetaTester: IdentifiableModel {
-
-    public var name: String {
-        [attributes.firstName, attributes.lastName].compactMap { $0 }.joined(separator: " ")
     }
 }
