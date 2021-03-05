@@ -17,6 +17,19 @@ enum AscGenericEndpoint<M: Model> {
     case delete(type: M.Type, id: String)
 }
 
+enum AscEndpoint {
+    case read(url: URL, filters: [Filter], limit: UInt)
+
+    case listAppStoreVersions(appId: String, filters: [Filter], limit: UInt?)
+
+    case inviteBetaTester(testerId: String, appId: String)
+    case addBetaTester(email: String, firstName: String, lastName: String, groupId: String)
+
+    case registerBundleId(attributes: BundleId.Attributes)
+
+    case expireBuild(_ build: Build)
+}
+
 extension AscGenericEndpoint: Endpoint {
 
     var host: String {
@@ -80,17 +93,6 @@ extension AscGenericEndpoint: Endpoint {
     }
 }
 
-enum AscEndpoint {
-    case read(url: URL, filters: [Filter], limit: UInt)
-
-    case listAppStoreVersions(appId: String, filters: [Filter], limit: UInt?)
-
-    case inviteBetaTester(testerId: String, appId: String)
-    case addBetaTester(email: String, firstName: String, lastName: String, groupId: String)
-
-    case registerBundleId(attributes: BundleId.Attributes)
-}
-
 extension AscEndpoint: Endpoint {
 
     var host: String {
@@ -110,14 +112,21 @@ extension AscEndpoint: Endpoint {
         case .addBetaTester: return "/\(apiVersion)/betaTesters"
 
         case .registerBundleId: return "/\(apiVersion)/bundleIds"
+
+        case .expireBuild(let build): return "/\(apiVersion)/builds/\(build.id)"
         }
     }
 
     var queryItems: [URLQueryItem] {
         switch self {
-        case let .read(_, filters, limit): return queryItems(from: filters, limit: limit)
-        case let .listAppStoreVersions(_, filters, limit): return queryItems(from: filters, limit: limit)
-        default: return []
+        case let .read(_, filters, limit):
+            return queryItems(from: filters, limit: limit)
+
+        case let .listAppStoreVersions(_, filters, limit):
+            return queryItems(from: filters, limit: limit)
+
+        case .inviteBetaTester, .addBetaTester, .registerBundleId, .expireBuild:
+            return []
         }
     }
 
@@ -127,6 +136,8 @@ extension AscEndpoint: Endpoint {
             return .get
         case .addBetaTester, .inviteBetaTester, .registerBundleId:
             return .post
+        case .expireBuild:
+            return .patch
         }
     }
 
@@ -207,6 +218,18 @@ extension AscEndpoint: Endpoint {
             return [
                 "data": [
                     "type": "bundleIds",
+                    "attributes": attributes
+                ]
+            ]
+        case let .expireBuild(build):
+            let attributes: [String: Any] = [
+                "expired": true
+            ]
+
+            return [
+                "data": [
+                    "id": "\(build.id)",
+                    "type": "builds",
                     "attributes": attributes
                 ]
             ]

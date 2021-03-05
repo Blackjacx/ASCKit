@@ -32,7 +32,9 @@ public extension Build {
         public var version: String
         public var usesNonExemptEncryption: Bool?
         public var uploadedDate: Date
-        public var expirationDate: Date
+        // Contains fractional seconds and cannot be decoded by default Json.decoder with
+        // `decoder.dateDecodingStrategy = .iso8601`
+//        public var expirationDate: Date
     }
 
     struct Relationships: Model {
@@ -76,7 +78,7 @@ public extension Array where Element == Build {
         case "version": out(\.attributes.version)
         case "usesNonExemptEncryption": out(\.attributes.usesNonExemptEncryption)
         case "uploadedDate": out(\.attributes.uploadedDate)
-        case "expirationDate": out(\.attributes.expirationDate)
+//        case "expirationDate": out(\.attributes.expirationDate) // see above
         default: out()
         }
     }
