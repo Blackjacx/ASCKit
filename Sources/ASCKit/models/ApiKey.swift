@@ -7,19 +7,18 @@
 
 import Foundation
 
-public struct ApiKey {
-    public var id: String = UUID().uuidString
+public struct ApiKey: IdentifiableModel {
+    public var id: String
     public var name: String
     public var path: String
-    public var keyId: String
     public var issuerId: String
+    public var isActive: Bool
 
-    public init(name: String, path: String, keyId: String, issuerId: String) {
+    public init(id: String, name: String, path: String, issuerId: String, isActive: Bool = false) {
+        self.id = id
         self.name = name
         self.path = path
-        self.keyId = keyId
         self.issuerId = issuerId
+        self.isActive = isActive
     }
 }
-
-extension ApiKey: IdentifiableModel {}

@@ -8,7 +8,6 @@
 import Foundation
 import Engine
 
-private var apiKey: ApiKey?
 private let apiVersion: String = "v1"
 private let baseUrlPath = "api.appstoreconnect.apple.com"
 
@@ -71,7 +70,7 @@ extension AscGenericEndpoint: Endpoint {
 
         if shouldAuthorize {
             do {
-                let token = try determineToken()
+                let token = try ApiKeysOperation.createAccessToken()
                 headers["Authorization"] = "Bearer \(token)"
             } catch {
                 print(error)
@@ -94,6 +93,9 @@ extension AscGenericEndpoint: Endpoint {
 }
 
 extension AscEndpoint: Endpoint {
+
+    /// Used o specify the id of an already registered key to use
+    public static var apiKeyId: String?
 
     var host: String {
         baseUrlPath
@@ -153,7 +155,7 @@ extension AscEndpoint: Endpoint {
 
         if shouldAuthorize {
             do {
-                let token = try determineToken()
+                let token = try ApiKeysOperation.createAccessToken()
                 headers["Authorization"] = "Bearer \(token)"
             } catch {
                 print(error)
@@ -248,32 +250,5 @@ extension Endpoint {
         items += filters.map { URLQueryItem(name: "filter[\($0.key)]", value: $0.value) }
         items += [URLQueryItem(name: "limit", value: "\(limit ?? Constants.maxPageSize)")]
         return items
-    }
-
-    func determineToken() throws -> String {
-
-        if apiKey == nil {
-            let op = ApiKeysOperation(.list)
-            op.executeSync()
-            let apiKeys = try op.result.get()
-
-            switch apiKeys.count {
-            case 0: throw AscError.noApiKeysSpecified
-            case 1: apiKey = apiKeys[0]
-            default:
-                print("Please choose one of the registered API keys:")
-                var options = apiKeys.enumerated().map {
-                    "\t \($0 + 1). \($1.name) (\($1.keyId))"
-                }
-                options[0].append(" <- default")
-                options.forEach { print($0) }
-
-                guard let index = readLine().map({(Int($0) ?? 1) - 1}), (0..<apiKeys.count).contains(index) else {
-                    throw AscError.invalidInput("Please enter the specified number of the key.")
-                }
-                apiKey = apiKeys[index]
-            }
-        }
-        return try JSONWebToken.create(keyFile: apiKey!.path, kid: apiKey!.keyId, iss: apiKey!.issuerId)
     }
 }
