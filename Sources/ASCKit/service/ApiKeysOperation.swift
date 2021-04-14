@@ -110,6 +110,6 @@ public final class ApiKeysOperation: AsyncResultOperation<[ApiKey], Swift.Error>
         } else {
             throw AscError.noApiKeysRegistered
         }
-        return try JSONWebToken.create(keyFile: key.path, kid: key.id, iss: key.issuerId)
+        return try JSONWebToken.create(privateKeySource: key.source, kid: key.id, iss: key.issuerId)
     }
 }
