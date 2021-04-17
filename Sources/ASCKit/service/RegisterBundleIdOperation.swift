@@ -10,8 +10,7 @@ import Engine
 
 public final class RegisterBundleIdOperation: AsyncResultOperation<BundleId, Network.Error> {
 
-    #warning("make global singleton from network")
-    let network = Network()
+    let network = Network.shared
 
     let attributes: BundleId.Attributes
 

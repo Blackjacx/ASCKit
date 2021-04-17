@@ -15,8 +15,7 @@ import Engine
 /// 2. Load only the first page and succeeding ones using additional requests.
 public final class ListOperation<P: Pageable>: AsyncResultOperation<P, Network.Error> {
 
-    #warning("make global singletom from network")
-    let network = Network()
+    let network = Network.shared
 
     let filters: [Filter]
     let limit: UInt?

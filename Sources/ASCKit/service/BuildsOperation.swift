@@ -14,8 +14,7 @@ public final class BuildsOperation: AsyncResultOperation<[Build], Network.Error>
         case expire(ids: [String])
     }
 
-    #warning("make global singletom from network")
-    let network = Network()
+    let network = Network.shared
 
     private let subcommand: SubCommand
 

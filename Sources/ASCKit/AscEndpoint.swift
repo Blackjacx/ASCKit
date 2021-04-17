@@ -129,12 +129,12 @@ extension AscGenericEndpoint: Endpoint {
 
 extension AscEndpoint: Endpoint {
 
+    var url: URL? {
+        nil
+    }
+
     /// Used o specify the id of an already registered key to use
     public static var apiKeyId: String?
-
-    var url: URL? {
-        return nil
-    }
 
     var host: String {
         baseUrlPath

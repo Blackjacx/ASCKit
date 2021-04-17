@@ -7,10 +7,27 @@
 
 import Foundation
 import Engine
+import Combine
 
 public struct ASCService {
 
-    static let network = Network()
+    static let network = Network.shared
+
+    // MARK: - Generic List
+
+    /// Generic function to get pageable models for each model of the ASC API. Automatically evaluates the previous
+    /// result or fetches the first page if nil.
+    public static func list<P: Pageable>(previousPageable: P?,
+                                         filters: [Filter] = [],
+                                         limit: UInt? = nil) -> AnyPublisher<P, Network.Error> {
+        let endpoint: AscGenericEndpoint<P.ModelType>
+        if let nextUrl = previousPageable?.nextUrl {
+            endpoint = AscGenericEndpoint.url(nextUrl, type: P.ModelType.self)
+        } else {
+            endpoint = AscGenericEndpoint.list(type: P.ModelType.self, filters: filters, limit: limit)
+        }
+        return network.request(endpoint: endpoint)
+    }
 
     // MARK: - Apps
 
