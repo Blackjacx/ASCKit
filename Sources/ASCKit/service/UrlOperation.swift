@@ -9,7 +9,7 @@ import Foundation
 import Engine
 
 /// Operation for reading given urls. Query parameters like limit or filters should already be added.
-public final class UrlOperation<P: Pageable>: AsyncResultOperation<P, Network.Error> {
+public final class UrlOperation<P: Pageable>: AsyncResultOperation<P, NetworkError> {
 
     let network = Network.shared
 

@@ -8,7 +8,7 @@
 import Foundation
 import Engine
 
-public final class BuildsOperation: AsyncResultOperation<[Build], Network.Error> {
+public final class BuildsOperation: AsyncResultOperation<[Build], NetworkError> {
 
     public enum SubCommand {
         case expire(ids: [String])
@@ -43,11 +43,11 @@ public final class BuildsOperation: AsyncResultOperation<[Build], Network.Error>
 
             guard !builds.isEmpty else {
                 #warning("inform the user via PROPER error when no builds have been found")
-                finish(with: .failure(Network.Error.noData(error: nil)))
+                finish(with: .failure(NetworkError.noData(error: nil)))
                 return
             }
 
-            let results: [Result<Build, Network.Error>] = builds
+            let results: [Result<Build, NetworkError>] = builds
                 .map { AscEndpoint.expireBuild($0) }
                 .map { network.syncRequest(endpoint: $0) }
 

@@ -9,7 +9,7 @@ import Foundation
 import Engine
 
 /// Lists all instances of the given model
-public final class DeleteOperation<M: IdentifiableModel>: AsyncResultOperation<EmptyResponse, Network.Error> {
+public final class DeleteOperation<M: IdentifiableModel>: AsyncResultOperation<EmptyResponse, NetworkError> {
 
     let network = Network.shared
 

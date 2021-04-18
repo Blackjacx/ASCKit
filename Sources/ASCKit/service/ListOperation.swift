@@ -13,7 +13,7 @@ import Engine
 /// Supports 2 modi:
 /// 1. Load all instances of the given model.
 /// 2. Load only the first page and succeeding ones using additional requests.
-public final class ListOperation<P: Pageable>: AsyncResultOperation<P, Network.Error> {
+public final class ListOperation<P: Pageable>: AsyncResultOperation<P, NetworkError> {
 
     let network = Network.shared
 

@@ -8,7 +8,7 @@
 import Foundation
 import Engine
 
-public final class RegisterBundleIdOperation: AsyncResultOperation<BundleId, Network.Error> {
+public final class RegisterBundleIdOperation: AsyncResultOperation<BundleId, NetworkError> {
 
     let network = Network.shared
 

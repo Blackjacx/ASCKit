@@ -19,7 +19,7 @@ public struct ASCService {
     /// result or fetches the first page if nil.
     public static func list<P: Pageable>(previousPageable: P?,
                                          filters: [Filter] = [],
-                                         limit: UInt? = nil) -> AnyPublisher<P, Network.Error> {
+                                         limit: UInt? = nil) -> AnyPublisher<P, NetworkError> {
         let endpoint: AscGenericEndpoint<P.ModelType>
         if let nextUrl = previousPageable?.nextUrl {
             endpoint = AscGenericEndpoint.url(nextUrl, type: P.ModelType.self)
