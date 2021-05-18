@@ -15,6 +15,10 @@ public struct ASCService {
 
     // MARK: - Generic List
 
+    #warning("""
+        return a publisher that loads all pages when limit is nil.
+        https://www.donnywals.com/recursively-execute-a-paginated-network-call-with-combine/
+    """)
     /// Generic function to get pageable models for each model of the ASC API. Automatically evaluates the previous
     /// result or fetches the first page if nil.
     public static func list<P: Pageable>(previousPageable: P?,
