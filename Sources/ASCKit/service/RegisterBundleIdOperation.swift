@@ -8,10 +8,9 @@
 import Foundation
 import Engine
 
-public final class RegisterBundleIdOperation: AsyncResultOperation<BundleId, Network.Error> {
+public final class RegisterBundleIdOperation: AsyncResultOperation<BundleId, NetworkError> {
 
-    #warning("make global singletom from network")
-    let network = Network()
+    let network = Network.shared
 
     let attributes: BundleId.Attributes
 

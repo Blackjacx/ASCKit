@@ -7,10 +7,31 @@
 
 import Foundation
 import Engine
+import Combine
 
 public struct ASCService {
 
-    static let network = Network()
+    static let network = Network.shared
+
+    // MARK: - Generic List
+
+    #warning("""
+        return a publisher that loads all pages when limit is nil.
+        https://www.donnywals.com/recursively-execute-a-paginated-network-call-with-combine/
+    """)
+    /// Generic function to get pageable models for each model of the ASC API. Automatically evaluates the previous
+    /// result or fetches the first page if nil.
+    public static func list<P: Pageable>(previousPageable: P?,
+                                         filters: [Filter] = [],
+                                         limit: UInt? = nil) -> AnyPublisher<P, NetworkError> {
+        let endpoint: AscGenericEndpoint<P.ModelType>
+        if let nextUrl = previousPageable?.nextUrl {
+            endpoint = AscGenericEndpoint.url(nextUrl, type: P.ModelType.self)
+        } else {
+            endpoint = AscGenericEndpoint.list(type: P.ModelType.self, filters: filters, limit: limit)
+        }
+        return network.request(endpoint: endpoint)
+    }
 
     // MARK: - Apps
 
@@ -113,6 +134,13 @@ public struct ASCService {
     }
 
     // MARK: - DEPRECATED
+
+    #warning("""
+        Don't forget to re-write AscGenericEndpoint.jsonDecode(...) when using operations for all calls above. We don't
+        use AscGenericEndpoint.list then directly anymore (like below) - just via the ListOperation so we can be sure
+        to get a PageableModel result then.
+    """)
+
 
     /// This will be transformed to a dependent operation once beta testers is realized as operation too
     static func listBetaGroups(filters: [Filter] = []) throws -> [BetaGroup] {

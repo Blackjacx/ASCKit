@@ -1,4 +1,4 @@
-// swift-tools-version:5.3
+// swift-tools-version:5.4
 import PackageDescription
 
 let package = Package(
@@ -14,7 +14,7 @@ let package = Package(
     ],
     dependencies: [
         .package(name: "Engine", url: "https://github.com/blackjacx/engine", .branch("develop")),
-        // .package(name: "Engine", path: "../Engine"),
+//         .package(name: "Engine", path: "../Engine"),
         .package(name: "SwiftKeychainWrapper", url: "https://github.com/jrendel/SwiftKeychainWrapper", from: "4.0.1"),
         .package(name: "Quick", url: "https://github.com/Quick/Quick", from: "3.1.2"),
         .package(name: "Nimble", url: "https://github.com/Quick/Nimble", from: "9.0.0"),

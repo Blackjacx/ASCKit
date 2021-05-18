@@ -9,10 +9,9 @@ import Foundation
 import Engine
 
 /// Lists all instances of the given model
-public final class DeleteOperation<M: IdentifiableModel>: AsyncResultOperation<EmptyResponse, Network.Error> {
+public final class DeleteOperation<M: IdentifiableModel>: AsyncResultOperation<EmptyResponse, NetworkError> {
 
-    #warning("make global singletom from network")
-    let network = Network()
+    let network = Network.shared
 
     let model: M
 

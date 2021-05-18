@@ -8,11 +8,14 @@
 import Foundation
 import Engine
 
-/// Lists all instances of the given model
-public final class ListOperation<M: Model>: AsyncResultOperation<[M], Network.Error> {
+/// Lists instances of the given model.
+///
+/// Supports 2 modi:
+/// 1. Load all instances of the given model.
+/// 2. Load only the first page and succeeding ones using additional requests.
+public final class ListOperation<P: Pageable>: AsyncResultOperation<P, NetworkError> {
 
-    #warning("make global singletom from network")
-    let network = Network()
+    let network = Network.shared
 
     let filters: [Filter]
     let limit: UInt?
@@ -23,8 +26,8 @@ public final class ListOperation<M: Model>: AsyncResultOperation<[M], Network.Er
     }
 
     public override func main() {
-        let endpoint = AscGenericEndpoint.list(type: M.self, filters: filters, limit: limit)
-        network.request(endpoint: endpoint) { [weak self] (result: RequestResult<[M]>) in
+        let endpoint = AscGenericEndpoint.list(type: P.ModelType.self, filters: filters, limit: limit)
+        network.request(endpoint: endpoint) { [weak self] (result: RequestResult<P>) in
             self?.finish(with: result)
         }
     }
