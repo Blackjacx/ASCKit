@@ -21,6 +21,7 @@ public struct ASCService {
     """)
     /// Generic function to get pageable models for each model of the ASC API. Automatically evaluates the previous
     /// result or fetches the first page if nil.
+    /// - note: Suitable for SwiftUI Apps
     public static func list<P: Pageable>(previousPageable: P?,
                                          filters: [Filter] = [],
                                          limit: UInt? = nil) -> AnyPublisher<P, NetworkError> {
@@ -33,6 +34,16 @@ public struct ASCService {
         return network.request(endpoint: endpoint)
     }
 
+    /// Generic, throwable function to return any list of `IdentifiableModel`s.
+    /// - note: Suitable for CLI tools
+    public static func list<P: IdentifiableModel>(filters: [Filter] = [], limit: UInt? = nil) throws -> [P] {
+        let loader = PagedItemLoader<P>(filters: filters, limit: limit)
+        loader.loadMoreIfNeeded()
+        while loader.isLoading { RunLoop.current.run(until: Date(timeIntervalSinceNow: 0.1)) }
+        if let error = loader.error { throw error }
+        return loader.items
+    }
+
     // MARK: - Apps
 
     @discardableResult
@@ -40,7 +51,7 @@ public struct ASCService {
                                             filters: [Filter] = [],
                                             limit: UInt? = nil) throws -> [(app: App, versions: [AppStoreVersion])] {
 
-        let apps = try listApps()
+        let apps: [App] = try list()
         let iterableAppIds = appIds.count > 0 ? appIds : apps.map({ $0.id })
         var appVersionTuple: [(app: App, versions: [AppStoreVersion])] = []
         var errors: [Error] = []
@@ -69,13 +80,13 @@ public struct ASCService {
 
     public static func inviteBetaTester(email: String, appIds: [String]) throws {
 
-        let apps = try listApps()
+        let apps: [App] = try list()
         let iterableAppIds = appIds.count > 0 ? appIds : apps.map({ $0.id })
         guard iterableAppIds.count > 0 else {
             throw AscError.noDataProvided("app_ids")
         }
 
-        guard let tester = try listBetaTester(filters: [Filter(key: BetaTester.FilterKey.email, value: email)]).first else {
+        guard let tester: BetaTester = try list(filters: [Filter(key: BetaTester.FilterKey.email, value: email)]).first else {
             throw AscError.noUserFound(email)
         }
 
@@ -110,7 +121,7 @@ public struct ASCService {
             // create filters for group names
             .map({ Filter(key: BetaGroup.FilterKey.name, value: $0) })
             // union of groups of different names
-            .reduce([], { $0.union(try listBetaGroups(filters: [$1])) })
+            .reduce([], { $0.union(try list(filters: [$1])) })
 
         var receivedObjects: [BetaTester] = []
         var errors: [Error] = []
@@ -131,35 +142,5 @@ public struct ASCService {
         if !errors.isEmpty {
             throw AscError.requestFailed(underlyingErrors: errors)
         }
-    }
-
-    // MARK: - DEPRECATED
-
-    #warning("""
-        Don't forget to re-write AscGenericEndpoint.jsonDecode(...) when using operations for all calls above. We don't
-        use AscGenericEndpoint.list then directly anymore (like below) - just via the ListOperation so we can be sure
-        to get a PageableModel result then.
-    """)
-
-
-    /// This will be transformed to a dependent operation once beta testers is realized as operation too
-    static func listBetaGroups(filters: [Filter] = []) throws -> [BetaGroup] {
-        let endpoint = AscGenericEndpoint.list(type: BetaGroup.self, filters: filters, limit: nil)
-        let result: RequestResult<[BetaGroup]> = network.syncRequest(endpoint: endpoint)
-        return try result.get()
-    }
-
-    /// This will be transformed to a dependent operation once beta testers is realized as operation too
-    static func listBetaTester(filters: [Filter] = []) throws -> [BetaTester] {
-        let endpoint = AscGenericEndpoint.list(type: BetaTester.self, filters: filters, limit: nil)
-        let result: RequestResult<[BetaTester]> = network.syncRequest(endpoint: endpoint)
-        return try result.get()
-    }
-
-    /// This will be transformed to a dependent operation once beta testers is realized as operation too
-    static func listApps(filters: [Filter] = []) throws -> [App] {
-        let endpoint = AscGenericEndpoint.list(type: App.self, filters: filters, limit: nil)
-        let result: RequestResult<[App]> = network.syncRequest(endpoint: endpoint)
-        return try result.get()
     }
 }
