@@ -94,7 +94,7 @@ extension AscGenericEndpoint: Endpoint {
 
         if shouldAuthorize {
             do {
-                let token = try ApiKeysOperation.createAccessToken()
+                let token = try ASCService.createAccessToken()
                 headers["Authorization"] = "Bearer \(token)"
             } catch {
                 print(error)
@@ -202,7 +202,7 @@ extension AscEndpoint: Endpoint {
 
         if shouldAuthorize {
             do {
-                let token = try ApiKeysOperation.createAccessToken()
+                let token = try ASCService.createAccessToken()
                 headers["Authorization"] = "Bearer \(token)"
             } catch {
                 print(error)
