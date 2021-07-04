@@ -83,6 +83,10 @@ extension AscGenericEndpoint: Endpoint {
         }
     }
 
+    var timeout: TimeInterval {
+        5
+    }
+
     var headers: [String : String]? {
         var headers: [String: String] = [
             "Content-Type": "application/json",
@@ -180,6 +184,10 @@ extension AscEndpoint: Endpoint {
         case .expireBuild:
             return .patch
         }
+    }
+
+    var timeout: TimeInterval {
+        5
     }
 
     var shouldAuthorize: Bool {

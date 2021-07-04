@@ -20,21 +20,12 @@
         }
       },
       {
-        "package": "Engine",
-        "repositoryURL": "https://github.com/blackjacx/engine",
-        "state": {
-          "branch": "develop",
-          "revision": "47855b04cf96a56ed6dde6aa555db87f62cfdbcc",
-          "version": null
-        }
-      },
-      {
         "package": "jwt-kit",
         "repositoryURL": "https://github.com/vapor/jwt-kit.git",
         "state": {
           "branch": null,
-          "revision": "ca2edf69a613f3d89354114f56cfd9921d2727d5",
-          "version": "4.2.6"
+          "revision": "1822bb0abf0a31a4b5078ec19061c548835253b5",
+          "version": "4.3.0"
         }
       },
       {
@@ -60,8 +51,8 @@
         "repositoryURL": "https://github.com/apple/swift-crypto.git",
         "state": {
           "branch": null,
-          "revision": "127d3745c37b5705e4bc8d16c7951c48dcc3332c",
-          "version": "2.0.0"
+          "revision": "9b5ef28601a9c745c9cdb54d3f243e28ac830982",
+          "version": "2.0.1"
         }
       },
       {

@@ -1,20 +1,20 @@
-// swift-tools-version:5.3
+// swift-tools-version:5.5
 import PackageDescription
 
 let package = Package(
     name: "ASCKit",
     platforms: [
-       .macOS(.v10_15),
-       .iOS(.v13),
-       .watchOS(.v5),
-       .tvOS(.v11),
+        .macOS("12"),
+//        .iOS("15"),
+//        .tvOS("15"),
+//        .watchOS("8")
     ],
     products: [
         .library(name: "ASCKit", targets: ["ASCKit"]),
     ],
     dependencies: [
-        .package(name: "Engine", url: "https://github.com/blackjacx/engine", .branch("develop")),
-//         .package(name: "Engine", path: "../Engine"),
+//        .package(name: "Engine", url: "https://github.com/blackjacx/engine", .branch("develop")),
+        .package(name: "Engine", path: "../Engine"),
         .package(name: "SwiftKeychainWrapper", url: "https://github.com/jrendel/SwiftKeychainWrapper", from: "4.0.1"),
         .package(name: "Quick", url: "https://github.com/Quick/Quick", from: "3.1.2"),
         .package(name: "Nimble", url: "https://github.com/Quick/Nimble", from: "9.0.0"),
