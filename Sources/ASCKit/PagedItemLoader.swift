@@ -11,9 +11,6 @@ import Engine
 
 public final class PagedItemLoader<Item: IdentifiableModel>: ObservableObject {
 
-    @Published public var isLoading: Bool = false
-    public var error: NetworkError?
-
     private (set) public var items: [Item] = []
     private (set) public var pageableItems: PageableModel<Item>?
 
@@ -21,7 +18,6 @@ public final class PagedItemLoader<Item: IdentifiableModel>: ObservableObject {
     private let limit: UInt?
 
     private var network = Network.shared
-    private var subscribers = Set<AnyCancellable>()
     private var canLoadMorePages = true
 
 
@@ -32,34 +28,29 @@ public final class PagedItemLoader<Item: IdentifiableModel>: ObservableObject {
         self.limit = limit
     }
 
-    public func loadMoreIfNeeded(currentItem: Item? = nil) {
+    /// - throws: NetworkError
+    public func loadMoreIfNeeded(currentItem: Item? = nil) async throws {
         guard let item = currentItem else {
-            loadMoreContent()
+            try await loadMoreContent()
             return
         }
         let thresholdIndex = items.index(items.endIndex, offsetBy: -5)
         if items.firstIndex(where: { $0.id == item.id }) == thresholdIndex {
-            loadMoreContent()
+            try await loadMoreContent()
         }
     }
 
-    private func loadMoreContent() {
-        guard !isLoading && canLoadMorePages else {
+    private func loadMoreContent() async throws {
+        guard canLoadMorePages else {
             return
         }
-        isLoading = true
 
-        ASCService.list(previousPageable: pageableItems, filters: filters, limit: limit)
-            .sink(receiveCompletion: { result in
-                defer { self.isLoading = false } // publish new loading state
-                guard case let .failure(error) = result else { return } // only handle error case
-                self.error = error
-            }, receiveValue: { [weak self] (pageableResult: PageableModel<Item>) in
-                guard let self = self else { return }
-                self.items += pageableResult.data
-                self.pageableItems = pageableResult
-                self.canLoadMorePages = pageableResult.totalCount > self.items.count
-            })
-            .store(in: &subscribers)
+        let pageableResult = try await ASCService.list(previousPageable: pageableItems,
+                                                       filters: filters,
+                                                       limit: limit)
+
+        items += pageableResult.data
+        pageableItems = pageableResult
+        canLoadMorePages = pageableResult.totalCount > items.count
     }
 }
