@@ -41,6 +41,7 @@ public struct ASCService {
         return try await network.request(endpoint: endpoint)
     }
 
+    #warning("Load all pages here when limit == nil")
     /// Generic, throwable function to return any list of `IdentifiableModel`s.
     /// - note: Suitable for CLI tools
     public static func list<P: IdentifiableModel>(filters: [Filter] = [], limit: UInt? = nil) async throws -> [P] {
@@ -127,19 +128,33 @@ public struct ASCService {
                                             filters: [Filter] = [],
                                             limit: UInt? = nil) async throws -> [(app: App, versions: [AppStoreVersion])] {
 
+        typealias ResultType = (app: App, versions: [AppStoreVersion])
+
         let apps: [App] = try await list()
         let iterableAppIds = appIds.count > 0 ? appIds : apps.map({ $0.id })
-        var appVersionTuple: [(app: App, versions: [AppStoreVersion])] = []
+        var results: [ResultType] = []
         var errors: [Error] = []
 
-        for id in iterableAppIds {
-            let app = apps.first(where: { $0.id == id })!
-            let endpoint = AscEndpoint.listAppStoreVersions(appId: id, filters: filters, limit: limit)
-            do {
-                let versions: [AppStoreVersion] = try await network.request(endpoint: endpoint)
-                appVersionTuple.append((app: app, versions: versions))
-            } catch {
-                errors.append(error)
+        await withTaskGroup(of: Result<ResultType, Error>.self) { group in
+
+            for id in iterableAppIds {
+                let app = apps.first { $0.id == id }!
+                let endpoint = AscEndpoint.listAppStoreVersions(appId: id, filters: filters, limit: limit)
+
+                group.async {
+                    do {
+                        return .success((app, versions: try await network.request(endpoint: endpoint)))
+                    } catch {
+                        return .failure(error)
+                    }
+                }
+            }
+
+            for await result in group {
+                switch result {
+                case .success(let result): results.append(result)
+                case .failure(let error): errors.append(error)
+                }
             }
         }
 
@@ -147,12 +162,14 @@ public struct ASCService {
             throw AscError.requestFailed(underlyingErrors: errors)
         }
 
-        return appVersionTuple
+        return results
     }
 
     // MARK: - Beta Testers
 
     public static func inviteBetaTester(email: String, appIds: [String]) async throws {
+
+        typealias ResultType = BetaTesterInvitationResponse
 
         let apps: [App] = try await list()
         let iterableAppIds = appIds.count > 0 ? appIds : apps.map({ $0.id })
@@ -164,19 +181,31 @@ public struct ASCService {
             throw AscError.noUserFound(email)
         }
 
-        var receivedObjects: [BetaTesterInvitationResponse] = []
+        var results: [ResultType] = []
         var errors: [Error] = []
 
-        for id in iterableAppIds {
-            let app = apps.first { id == $0.id }!
-            let endpoint = AscEndpoint.inviteBetaTester(testerId: tester.id, appId: id)
-            do {
-                let result: BetaTesterInvitationResponse = try await network.request(endpoint: endpoint)
-                receivedObjects.append(result)
-                print("Invited tester \(tester.name)  (\(tester.id)) to app \(app.name) (\(id))")
-            } catch {
-                print("Failed inviting tester \(tester.name) (\(tester.id)) to app \(app.name) (\(id))")
-                errors.append(error)
+        await withTaskGroup(of: Result<ResultType, Error>.self) { group in
+            for id in iterableAppIds {
+                let app = apps.first { id == $0.id }!
+                let endpoint = AscEndpoint.inviteBetaTester(testerId: tester.id, appId: id)
+
+                group.async {
+                    do {
+                        let result: ResultType = try await network.request(endpoint: endpoint)
+                        print("Invited tester \(tester.name)  (\(tester.id)) to app \(app.name) (\(id))")
+                        return .success(result)
+                    } catch {
+                        print("Failed inviting tester \(tester.name) (\(tester.id)) to app \(app.name) (\(id))")
+                        return .failure(error)
+                    }
+                }
+            }
+
+            for await result in group {
+                switch result {
+                case .success(let result): results.append(result)
+                case .failure(let error): errors.append(error)
+                }
             }
         }
 
@@ -185,9 +214,9 @@ public struct ASCService {
         }
     }
 
-    public static func addBetaTester(email: String,
-                                     first: String,
-                                     last: String, groupNames: [String]) async throws {
+    public static func addBetaTester(email: String, first: String, last: String, groupNames: [String]) async throws {
+
+        typealias ResultType = BetaTester
 
         let groupFilters: [Filter] = groupNames
             // create filters for group names
@@ -200,18 +229,31 @@ public struct ASCService {
             betaGroups.formUnion(try await list(filters: [filter]))
         }
 
-        var receivedObjects: [BetaTester] = []
+        var results: [ResultType] = []
         var errors: [Error] = []
 
-        for id in betaGroups.map(\.id) {
-            let endpoint = AscEndpoint.addBetaTester(email: email, firstName: first, lastName: last, groupId: id)
-            do {
-                let tester: BetaTester = try await network.request(endpoint: endpoint)
-                receivedObjects.append(tester)
+        await withTaskGroup(of: Result<ResultType, Error>.self) { group in
+            for id in betaGroups.map(\.id) {
+                let endpoint = AscEndpoint.addBetaTester(email: email, firstName: first, lastName: last, groupId: id)
                 let betaGroup = betaGroups.filter { id == $0.id }[0]
-                print("Added tester: \(tester.name), email: \(email), id: \(tester.id) to group: \(betaGroup.name), id: \(id)")
-            } catch {
-                errors.append(error)
+
+                group.async {
+                    do {
+                        let result: BetaTester = try await network.request(endpoint: endpoint)
+                        print("Added tester: \(result.name), email: \(email), id: \(result.id) to group: \(betaGroup.name), id: \(id)")
+                        return .success(result)
+                    } catch {
+                        print("Failed adding tester \(email) to group \(betaGroup.name) (\(id))")
+                        return .failure(error)
+                    }
+                }
+            }
+
+            for await result in group {
+                switch result {
+                case .success(let result): results.append(result)
+                case .failure(let error): errors.append(error)
+                }
             }
         }
 
@@ -263,6 +305,8 @@ public struct ASCService {
 
     public static func expireBuilds(ids: [String]) async throws -> [Build] {
 
+        typealias ResultType = Build
+
         let filters: [Filter]
 
         if ids.isEmpty {
@@ -271,24 +315,34 @@ public struct ASCService {
             filters = ids.map { Filter(key: Build.FilterKey.id, value: $0) }
         }
 
-        #warning("This doesn't load all builds due to paging limit")
         let nonExpiredBuilds: [Build] = try await list(filters: filters)
 
         guard !nonExpiredBuilds.isEmpty else {
-            #warning("inform the user via PROPER error when no builds have been found")
-            throw NetworkError.noData(error: nil)
+            throw AscError.noBuildsFound
         }
 
-        var expiredBuilds: [Build] = []
+        var results: [ResultType] = []
         var errors: [Error] = []
 
-        for build in nonExpiredBuilds {
-            let endpoint = AscEndpoint.expireBuild(build)
-            do {
-                let build: Build = try await network.request(endpoint: endpoint)
-                expiredBuilds.append(build)
-            } catch {
-                errors.append(error)
+        await withTaskGroup(of: Result<ResultType, Error>.self) { group in
+            for build in nonExpiredBuilds {
+                let endpoint = AscEndpoint.expireBuild(build)
+
+                group.async {
+                    do {
+                        let result: ResultType = try await network.request(endpoint: endpoint)
+                        return .success(result)
+                    } catch {
+                        return .failure(error)
+                    }
+                }
+            }
+
+            for await result in group {
+                switch result {
+                case .success(let result): results.append(result)
+                case .failure(let error): errors.append(error)
+                }
             }
         }
 
@@ -297,6 +351,6 @@ public struct ASCService {
             throw AscError.requestFailed(underlyingErrors: errors)
         }
 
-        return expiredBuilds
+        return results
     }
 }
