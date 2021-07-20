@@ -14,7 +14,10 @@ public struct BetaTester: IdentifiableModel {
     public var relationships: Relationships
 
     public var name: String {
-        [attributes.firstName, attributes.lastName].compactMap { $0 }.joined(separator: " ")
+        var comps = PersonNameComponents()
+        comps.givenName = attributes.firstName
+        comps.familyName = attributes.lastName
+        return PersonNameComponentsFormatter.localizedString(from: comps, style: .default, options: [])
     }
 }
 
