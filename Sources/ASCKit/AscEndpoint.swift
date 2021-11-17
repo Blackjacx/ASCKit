@@ -87,7 +87,7 @@ extension AscGenericEndpoint: Endpoint {
         5
     }
 
-    var headers: [String : String]? {
+    func headers() async -> [String : String]? {
         var headers: [String: String] = [
             "Content-Type": "application/json",
         ]
@@ -194,8 +194,7 @@ extension AscEndpoint: Endpoint {
         true
     }
 
-    var headers: [String : String]? {
-
+    func headers() async -> [String : String]? {
         var headers: [String: String] = [
             "Content-Type": "application/json",
         ]
