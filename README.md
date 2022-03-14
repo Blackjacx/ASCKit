@@ -10,7 +10,7 @@
 [![iOS 15+](https://img.shields.io/badge/iOS-15.0%2B-blue.svg)](https://developer.apple.com/download/)
 [![Xcode 13+](https://img.shields.io/badge/Xcode-13%2B-blue.svg)](https://developer.apple.com/download/)
 [![Codebeat](https://codebeat.co/badges/09488e6e-331e-4d7a-9238-3b2224cc8f04)](https://codebeat.co/projects/github-com-blackjacx-asckit-develop)
-[![License](https://img.shields.io/github/license/blackjacx/asckit.svg)](https://github.com/Blackjacx/Assist/blob/develop/LICENSE)
+[![License](https://img.shields.io/github/license/blackjacx/asckit.svg)](https://github.com/Blackjacx/asckit/blob/develop/LICENSE)
 [![Donate](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://www.paypal.me/STHEROLD)
 
 App Store Connect API access using your teams API key.
