@@ -141,7 +141,7 @@ public struct ASCService {
                 let app = apps.first { $0.id == id }!
                 let endpoint = AscEndpoint.listAppStoreVersions(appId: id, filters: filters, limit: limit)
 
-                group.async {
+                group.addTask {
                     do {
                         return .success((app, versions: try await network.request(endpoint: endpoint)))
                     } catch {
@@ -189,7 +189,7 @@ public struct ASCService {
                 let app = apps.first { id == $0.id }!
                 let endpoint = AscEndpoint.inviteBetaTester(testerId: tester.id, appId: id)
 
-                group.async {
+                group.addTask {
                     do {
                         let result: ResultType = try await network.request(endpoint: endpoint)
                         print("Invited tester \(tester.name)  (\(tester.id)) to app \(app.name) (\(id))")
@@ -237,7 +237,7 @@ public struct ASCService {
                 let endpoint = AscEndpoint.addBetaTester(email: email, firstName: first, lastName: last, groupId: id)
                 let betaGroup = betaGroups.filter { id == $0.id }[0]
 
-                group.async {
+                group.addTask {
                     do {
                         let result: BetaTester = try await network.request(endpoint: endpoint)
                         print("Added tester: \(result.name), email: \(email), id: \(result.id) to group: \(betaGroup.name), id: \(id)")
@@ -328,7 +328,7 @@ public struct ASCService {
             for build in nonExpiredBuilds {
                 let endpoint = AscEndpoint.expireBuild(build)
 
-                group.async {
+                group.addTask {
                     do {
                         let result: ResultType = try await network.request(endpoint: endpoint)
                         return .success(result)
