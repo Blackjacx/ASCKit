@@ -218,32 +218,26 @@ public struct ASCService {
 
         typealias ResultType = BetaTester
 
-        let groupFilters: [Filter] = groupNames
-            // create filters for group names
-            .map({ Filter(key: BetaGroup.FilterKey.name, value: $0) })
-
-        var betaGroups: Set<BetaGroup> = []
-
-        for filter in groupFilters {
-            // union of groups of different names
-            betaGroups.formUnion(try await list(filters: [filter]))
-        }
+        // create filters for group names
+        let groupFilters: [Filter] = [
+            Filter(key: BetaGroup.FilterKey.name, value: groupNames.joined(separator: ","))
+        ]
+        let betaGroups: [BetaGroup] = try await list(filters: groupFilters)
 
         var results: [ResultType] = []
         var errors: [Error] = []
 
         await withTaskGroup(of: Result<ResultType, Error>.self) { group in
-            for id in betaGroups.map(\.id) {
-                let endpoint = AscEndpoint.addBetaTester(email: email, firstName: first, lastName: last, groupId: id)
-                let betaGroup = betaGroups.filter { id == $0.id }[0]
+            for betaGroup in betaGroups {
+                let endpoint = AscEndpoint.addBetaTester(email: email, firstName: first, lastName: last, groupId: betaGroup.id)
 
                 group.addTask {
                     do {
                         let result: BetaTester = try await network.request(endpoint: endpoint)
-                        print("Added tester: \(result.name), email: \(email), id: \(result.id) to group: \(betaGroup.name), id: \(id)")
+                        print("Added tester: \(result.name), email: \(email), id: \(result.id) to group: \(betaGroup.name), id: \(betaGroup.id)")
                         return .success(result)
                     } catch {
-                        print("Failed adding tester \(email) to group \(betaGroup.name) (\(id))")
+                        print("Failed adding tester \(email) to group \(betaGroup.name) (\(betaGroup.id))")
                         return .failure(error)
                     }
                 }
