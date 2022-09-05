@@ -1,4 +1,4 @@
-version: 0.1.0
+version: 1
 builder:
   configs:
-      documentation_targets: [ASCKit]
+    - documentation_targets: [ASCKit]
