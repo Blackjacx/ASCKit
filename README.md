@@ -25,6 +25,28 @@ This is a package providing access to Apple's App Store Connect API. The idea wa
 
 I continuously evolve ASCKit as I require new functionality here. Please feel free to provide feedback or add new functionality by opening a PR.
 
+## Release
+
+To release this Swift package the following steps have to be taken:
+- Create a new branch `release-x.y.z`
+- Increment the version in https://github.com/Blackjacx/ASCKit/blob/develop/.spi.yml
+- Run `bash <(curl -H -s https://raw.githubusercontent.com/Blackjacx/Scripts/master/frameworks/bootstrap.sh)` to update to the latest shared development files
+- Run `bundle update` to update all Ruby gems
+- Commit all changes, make a PR and merge it to develop
+- Run `bundle exec fastlane release framework:"ASCKit" version:"x.y.z"` to release the new version
+- Post the following on Twitter
+```
+ASCKit release x.y.z 🎉
+
+▸ 🚀  Library package ASCKit (x.y.z) successfully published
+▸ 📅  September 2nd
+▸ 🌎  https://swiftpackageindex.com/Blackjacx/ASCKit
+▸ 🌎  https://github.com/Blackjacx/ASCKit/releases/latest
+▸ 👍  Tell your friends!
+
+#SPM #Apple #Development #AppStore #AppStoreConnect #AppStoreConnectAPI #Kit #Library #Package #Framework #Tools #Boilerplate #Code
+```
+
 ## Contribution
 
 - If you found a **bug**, please open an **issue**.
