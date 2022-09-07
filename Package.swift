@@ -16,9 +16,9 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/blackjacx/Engine", from: "0.0.3"),
         .package(url: "https://github.com/jrendel/SwiftKeychainWrapper", from: "4.0.1"),
-        .package(url: "https://github.com/Quick/Quick", from: "4.0.0"),
-        .package(url: "https://github.com/Quick/Nimble", from: "9.0.0"),
         .package(url: "https://github.com/vapor/jwt-kit.git", from: "4.1.0"),
+        .package(url: "https://github.com/Quick/Quick", from: "5.0.0"),
+        .package(url: "https://github.com/Quick/Nimble", from: "10.0.0"),
     ],
     targets: [
         .target(name: "ASCKit", dependencies: [.product(name: "JWTKit", package: "jwt-kit"), "Engine", "SwiftKeychainWrapper"]),
