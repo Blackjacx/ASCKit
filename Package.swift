@@ -6,9 +6,9 @@ let package = Package(
     platforms: [
         .macOS(.v12),
         .macCatalyst(.v15),
-//        .iOS(.v15),
-//        .tvOS(.v15),
-//        .watchOS(.v8)
+        .iOS(.v15),
+        .tvOS(.v15),
+        .watchOS(.v8)
     ],
     products: [
         .library(name: "ASCKit", targets: ["ASCKit"]),
