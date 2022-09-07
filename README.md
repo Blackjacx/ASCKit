@@ -25,6 +25,10 @@ This is a package providing access to Apple's App Store Connect API. The idea wa
 
 I continuously evolve ASCKit as I require new functionality here. Please feel free to provide feedback or add new functionality by opening a PR.
 
+## Code Documentation
+
+The [code documentation](https://swiftpackageindex.com/Blackjacx/ASCKit/develop/documentation/asckit) is generated and hosted by [Swift Package Index](https://swiftpackageindex.com/) (powered by [DocC](https://developer.apple.com/documentation/docc))
+
 ## Release
 
 To release this Swift package the following steps have to be taken:
