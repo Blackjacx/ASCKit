@@ -23,8 +23,7 @@ public struct ASCService {
 
     // MARK: - Generic List
 
-    #warning("Load all pages here when limit == nil")
-    /// Async/await function to genrically get pageable models for each model
+    /// Async/await function to generically get pageable models for each model
     /// of the ASC API. Automatically evaluates the previous result or fetches
     /// the first page if nil.
     /// - note: Suitable for both CLI tools and SwiftUI apps
@@ -41,7 +40,6 @@ public struct ASCService {
         return try await network.request(endpoint: endpoint)
     }
 
-    #warning("Load all pages here when limit == nil")
     /// Generic, throwable function to return any list of `IdentifiableModel`s.
     /// - note: Suitable for CLI tools
     public static func list<P: IdentifiableModel>(filters: [Filter] = [], limit: UInt? = nil) async throws -> [P] {

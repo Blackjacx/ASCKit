@@ -21,9 +21,12 @@ public final class PagedItemLoader<Item: IdentifiableModel>: ObservableObject {
     private var canLoadMorePages = true
 
 
-    /// Initializer with the possibility to specify a pagaing limit.
-    /// - Parameter limit: The maximum size of one page of items. Specify `nil` if you want to load all items at once.
-    public init(filters: [Filter] = [], limit: UInt? = Constants.defaultPageSize) {
+    /// Initializer with the possibility to specify a paging limit.
+    /// - Parameters
+    ///   - limit: The maximum size of one page of items AND the amount of
+    ///   items to load. Specify `nil` if you want to load all pages. In that
+    ///   case the page size will be the Apple default.
+    public init(filters: [Filter] = [], limit: UInt?) {
         self.filters = filters
         self.limit = limit
     }
@@ -51,6 +54,8 @@ public final class PagedItemLoader<Item: IdentifiableModel>: ObservableObject {
 
         items += pageableResult.data
         pageableItems = pageableResult
-        canLoadMorePages = pageableResult.totalCount > items.count
+        canLoadMorePages = pageableResult.totalCount > items.count && limit == nil
+
+        try await loadMoreContent()
     }
 }
