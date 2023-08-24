@@ -84,7 +84,7 @@ extension AscGenericEndpoint: Endpoint {
     }
 
     var timeout: TimeInterval {
-        5
+        30
     }
 
     func headers() async -> [String : String]? {
@@ -187,7 +187,7 @@ extension AscEndpoint: Endpoint {
     }
 
     var timeout: TimeInterval {
-        5
+        30
     }
 
     var shouldAuthorize: Bool {
