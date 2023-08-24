@@ -167,6 +167,45 @@ public struct ASCService {
 
     // MARK: - Beta Testers
 
+    public static func listBetaGroups(for betaTesters: [BetaTester],
+                                      filters: [Filter] = [],
+                                      limit: UInt? = nil) async throws -> [BetaGroup] {
+        typealias ResultType = [BetaGroup]
+
+        var results: ResultType = []
+        var errors: [Error] = []
+
+        await withTaskGroup(of: Result<ResultType, Error>.self) { group in
+            for tester in betaTesters {
+                let endpoint = AscEndpoint.listAllBetaGroupsForTester(id: tester.id,
+                                                                      filters: filters,
+                                                                      limit: limit)
+
+                group.addTask {
+                    do {
+                        let result: ResultType = try await network.request(endpoint: endpoint)
+                        return .success(result)
+                    } catch {
+                        return .failure(error)
+                    }
+                }
+            }
+
+            for await result in group {
+                switch result {
+                case .success(let result): results.append(contentsOf: result)
+                case .failure(let error): errors.append(error)
+                }
+            }
+        }
+
+        if !errors.isEmpty {
+            throw AscError.requestFailed(underlyingErrors: errors)
+        }
+
+        return results
+    }
+
     public static func inviteBetaTester(email: String, appIds: [String]) async throws {
 
         typealias ResultType = BetaTesterInvitationResponse
@@ -233,7 +272,7 @@ public struct ASCService {
 
                 group.addTask {
                     do {
-                        let result: BetaTester = try await network.request(endpoint: endpoint)
+                        let result: ResultType = try await network.request(endpoint: endpoint)
                         print("Added tester: \(result.name), email: \(email), id: \(result.id) to group: \(betaGroup.name), id: \(betaGroup.id)")
                         return .success(result)
                     } catch {

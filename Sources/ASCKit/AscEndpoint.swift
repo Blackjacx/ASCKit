@@ -18,9 +18,10 @@ enum AscGenericEndpoint<M: Model> {
 }
 
 enum AscEndpoint {
-    case read(url: URL, filters: [Filter], limit: UInt)
+    case read(url: URL, filters: [Filter], limit: UInt?)
 
     case listAppStoreVersions(appId: String, filters: [Filter], limit: UInt?)
+    case listAllBetaGroupsForTester(id: String, filters: [Filter], limit: UInt?)
 
     case inviteBetaTester(testerId: String, appId: String)
     case addBetaTester(email: String, firstName: String, lastName: String, groupId: String)
@@ -153,6 +154,7 @@ extension AscEndpoint: Endpoint {
         case .read(let url, _, _): return url.path
         case .listAppStoreVersions(let appId, _, _): return "/\(apiVersion)/apps/\(appId)/appStoreVersions"
 
+        case .listAllBetaGroupsForTester(let id, _, _): return "/\(apiVersion)/betaTesters/\(id)/betaGroups"
         case .inviteBetaTester: return "/\(apiVersion)/betaTesterInvitations"
         case .addBetaTester: return "/\(apiVersion)/betaTesters"
 
@@ -164,10 +166,9 @@ extension AscEndpoint: Endpoint {
 
     var queryItems: [URLQueryItem] {
         switch self {
-        case let .read(_, filters, limit):
-            return queryItems(from: filters, limit: limit)
-
-        case let .listAppStoreVersions(_, filters, limit):
+        case .read(_, let filters, let limit),
+                .listAppStoreVersions(_, let filters, let limit),
+                .listAllBetaGroupsForTester(_, let filters, let limit):
             return queryItems(from: filters, limit: limit)
 
         case .inviteBetaTester, .addBetaTester, .registerBundleId, .expireBuild:
@@ -177,7 +178,7 @@ extension AscEndpoint: Endpoint {
 
     var method: HTTPMethod {
         switch self {
-        case .read, .listAppStoreVersions:
+        case .read, .listAppStoreVersions, .listAllBetaGroupsForTester:
             return .get
         case .addBetaTester, .inviteBetaTester, .registerBundleId:
             return .post
@@ -212,7 +213,7 @@ extension AscEndpoint: Endpoint {
 
     var parameters: [String : Any]? {
         switch self {
-        case .read, .listAppStoreVersions:
+        case .read, .listAppStoreVersions, .listAllBetaGroupsForTester:
             return nil
         case let .addBetaTester(email, firstName, lastName, groupId):
             return [
