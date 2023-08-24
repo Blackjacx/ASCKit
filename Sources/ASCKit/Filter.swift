@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct Filter {
+public struct Filter: CustomStringConvertible {
 
     public let key: AnyHashable
     public let value: String
@@ -15,6 +15,12 @@ public struct Filter {
     public init(key: AnyHashable, value: String) {
         self.key = key
         self.value = value
+    }
+
+    // MARK: - CustomStringConvertible
+
+    public var description: String {
+        "Filter(Key: \(key), Value: \(value))"
     }
 }
 
