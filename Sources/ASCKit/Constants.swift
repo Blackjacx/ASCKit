@@ -8,7 +8,7 @@
 import Foundation
 
 public enum Constants {
-    public static let defaultPageSize: UInt = 50
+    public static let defaultPageSize: UInt = 200
     public static let maxPageSize: UInt = 200
 }
 
