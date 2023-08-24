@@ -2,16 +2,16 @@
 
 
 <!-- [![Test](https://github.com/Blackjacx/asckit/actions/workflows/test.yml/badge.svg)](https://github.com/Blackjacx/asckit/actions/workflows/test.yml) -->
-[![Twitter](https://img.shields.io/twitter/follow/blackjacxxx?label=%40Blackjacxxx)](https://twitter.com/blackjacxxx)
+[![Twitter Follow](https://img.shields.io/badge/follow-%40blackjacx-1DA1F2?logo=twitter&style=for-the-badge)](https://twitter.com/intent/follow?original_referer=https%3A%2F%2Fgithub.com%2Fblackjacx&screen_name=Blackjacxxx)
 [![Version](https://shields.io/github/v/release/blackjacx/ASCKit?display_name=tag&include_prereleases&sort=semver)](https://github.com/Blackjacx/ASCKit/releases)
 [![Swift Package Manager Compatible](https://img.shields.io/badge/SPM-compatible-brightgreen.svg)](https://swift.org/package-manager/)
 [![Swift Versions](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2FBlackjacx%2FASCKit%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/Blackjacx/ASCKit)
 [![Platforms](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2FBlackjacx%2FASCKit%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/Blackjacx/ASCKit)
-[![iOS 15+](https://img.shields.io/badge/iOS-15.0%2B-blue.svg)](https://developer.apple.com/download/)
-[![Xcode 13+](https://img.shields.io/badge/Xcode-13%2B-blue.svg)](https://developer.apple.com/download/)
+[![macOS 12+](https://img.shields.io/badge/macOS-12.0%2B-blue.svg)](https://developer.apple.com/download/)
+[![Xcode 14+](https://img.shields.io/badge/Xcode-14%2B-blue.svg)](https://developer.apple.com/download/)
 [![Codebeat](https://codebeat.co/badges/09488e6e-331e-4d7a-9238-3b2224cc8f04)](https://codebeat.co/projects/github-com-blackjacx-asckit-develop)
 [![License](https://img.shields.io/github/license/blackjacx/asckit.svg)](https://github.com/Blackjacx/asckit/blob/develop/LICENSE)
-[![Donate](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://www.paypal.me/STHEROLD)
+[![Donate](https://img.shields.io/badge/Donate-PayPal-blue.svg?logo=paypal&style=for-the-badge)](https://www.paypal.me/STHEROLD)
 
 App Store Connect API access using your teams API key.
 
@@ -32,7 +32,6 @@ The [code documentation](https://swiftpackageindex.com/Blackjacx/ASCKit/develop/
 ## Release
 
 To release this Swift package the following steps have to be taken:
-- Create a new branch `release-x.y.z`
 - Run `bash <(curl -H -s https://raw.githubusercontent.com/Blackjacx/Scripts/master/frameworks/bootstrap.sh)` to update to the latest shared development files
 - Run `bundle update` to update all Ruby gems
 - Commit all changes, make a PR and merge it to develop
@@ -41,13 +40,13 @@ To release this Swift package the following steps have to be taken:
 ```
 ASCKit release x.y.z 🎉
 
-▸ 🚀  Library package ASCKit (x.y.z) successfully published
-▸ 📅  September 2nd
+▸ 🚀  Library package ASCKit successfully published
+▸ 📅  August 24th
 ▸ 🌎  https://swiftpackageindex.com/Blackjacx/ASCKit
 ▸ 🌎  https://github.com/Blackjacx/ASCKit/releases/latest
 ▸ 👍  Tell your friends!
 
-#SPM #Apple #Development #AppStore #AppStoreConnect #AppStoreConnectAPI #Kit #Library #Package #Framework #Tools #Boilerplate #Code
+#SPM #Apple #Development #AppStore #AppStoreConnect #API #Library #Package #Tools
 ```
 
 ## Contribution
