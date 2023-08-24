@@ -295,17 +295,59 @@ public struct ASCService {
         }
     }
 
-    public static func deleteBetaTester(email: String) async throws -> BetaTester {
+    /// Searches beta testers based on the given filters and then deletes all
+    /// of them.
+    /// - parameters:
+    ///  - filters: The filters used to search for matching beta testers.
+    ///
+    ///  It is possible to search for multiple users based on different filter
+    ///  criteria at the same time, e.g.:
+    ///    -f "firstName=Stefan"
+    ///    -f "email=john.doe@ioki.com"
+    ///    -f "email=jane.doe@ioki.com"
+    public static func deleteBetaTesters(filters: [Filter]) async throws -> [BetaTester] {
+        let allValidBetaGroups: [BetaGroup] = try await list()
+        var allDeletedTesters: [BetaTester] = []
 
-        // Get id's
-        let filter = Filter(key: BetaTester.FilterKey.email, value: email)
-        let testers: [BetaTester] = try await list(filters: [filter])
+        for filter in filters {
+            // Get IDs of the beta testers
+            // We have to search for each filter separately as each filter might
+            // refer to a different tester.
+            let testers: [BetaTester] = try await list(filters: [filter])
 
-        guard let firstTester = testers.first else {
-            throw AscError.noUserFound(email)
+            // Either we can delete groups below or we cannot, because they are
+            // somehow fucked up in Apple's database like the ones below. In the
+            // latter case they are usually not part of `allValidBetaGroups`
+            // anymore but are only "shadows of their past".
+            //        User-Id: 8c7d99fb-775f-4b5e-a342-32d9cfb986ff
+            //        {
+            //            "id": "e27d7056-b689-4d2d-ab1c-8dfd94ac1b59"
+            //        },
+            //        {
+            //            "id": "b072ee31-036f-482d-9c1d-952580bb0a6d"
+            //        },
+            //        {
+            //            "id": "55e4783f-1470-46c0-bbd3-47cf3766d55e"
+            //        },
+            //        {
+            //            "id": "917ccfe3-8508-43cc-b9e7-5b60eaa33f7b"
+            //        }
+            let allValidTesterGroups: [BetaGroup] = try await listBetaGroups(for: testers)
+                .filter { allValidBetaGroups.map(\.id).contains($0.id) }
+
+            guard !testers.isEmpty && !allValidTesterGroups.isEmpty else {
+                // Skip deletion when no testers have been found
+                continue
+            }
+
+            for tester in testers {
+                _ = try await delete(model: tester)
+            }
+
+            allDeletedTesters += testers
         }
-        _ = try await delete(model: firstTester)
-        return firstTester
+
+        return allDeletedTesters
     }
 
     // MARK: BundleIDs
