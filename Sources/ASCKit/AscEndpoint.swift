@@ -295,7 +295,7 @@ extension Endpoint {
     func queryItems(from filters: [Filter], limit: UInt?) -> [URLQueryItem] {
         var items: [URLQueryItem] = []
         items += filters.map { URLQueryItem(name: "filter[\($0.key)]", value: $0.value) }
-        items += [URLQueryItem(name: "limit", value: "\(limit ?? Constants.maxPageSize)")]
+        items += [URLQueryItem(name: "limit", value: "\(Constants.defaultLimit(limit))")]
         return items
     }
 }
