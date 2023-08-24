@@ -308,6 +308,8 @@ public struct ASCService {
         var allDeletedTesters: [BetaTester] = []
 
         for filter in filters {
+            print("Processing beta tester for filter: \(filter)")
+            
             // Get IDs of the beta testers
             // We have to search for each filter separately as each filter might
             // refer to a different tester.
