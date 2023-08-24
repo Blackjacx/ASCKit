@@ -41,13 +41,13 @@ To release this Swift package the following steps have to be taken:
 ```
 ASCKit release x.y.z 🎉
 
-▸ 🚀  Library package ASCKit (x.y.z) successfully published
-▸ 📅  September 2nd
+▸ 🚀  Library package ASCKit successfully published
+▸ 📅  August 24th
 ▸ 🌎  https://swiftpackageindex.com/Blackjacx/ASCKit
 ▸ 🌎  https://github.com/Blackjacx/ASCKit/releases/latest
 ▸ 👍  Tell your friends!
 
-#SPM #Apple #Development #AppStore #AppStoreConnect #AppStoreConnectAPI #Kit #Library #Package #Framework #Tools #Boilerplate #Code
+#SPM #Apple #Development #AppStore #AppStoreConnect #API #Library #Package #Tools
 ```
 
 ## Contribution
