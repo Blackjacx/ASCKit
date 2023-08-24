@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+* Add log to show which tester is processed - [@Blackjacx](https://github.com/blackjacx).
 
 ## [0.2.0] - 2023-08-24Z
 * [#11](https://github.com/Blackjacx/ASCKit/pull/11): Fix Tester Deletion - [@Blackjacx](https://github.com/blackjacx).
