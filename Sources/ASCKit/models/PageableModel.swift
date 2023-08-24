@@ -12,8 +12,8 @@ public struct PageableModel<M: Model>: Pageable {
     public typealias ModelType = M
     public var data: [ModelType]
 
-    public var totalCount: Int { meta.paging.total }
-    public var limit: Int { meta.paging.limit }
+    public var totalCount: UInt { meta.paging.total }
+    public var limit: UInt { meta.paging.limit }
     public var nextUrl: URL? { links.next }
 
     var meta: PagingInformation
@@ -39,9 +39,9 @@ struct PagingInformation: Model {
 
     struct Paging: Model {
         /// (Required) The total number of resources matching your request.
-        var total: Int
+        var total: UInt
         /// (Required) The maximum number of resources to return per page, from 0 to 200.
-        var limit: Int
+        var limit: UInt
     }
 
     /// The paging information details.

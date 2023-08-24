@@ -1,9 +1,9 @@
 # App Store Connect Kit
 
 
-
-[![Twitter](https://img.shields.io/twitter/follow/blackjacxxx?label=%40Blackjacxxx)](https://twitter.com/blackjacx)
 <!-- [![Test](https://github.com/Blackjacx/asckit/actions/workflows/test.yml/badge.svg)](https://github.com/Blackjacx/asckit/actions/workflows/test.yml) -->
+[![Twitter](https://img.shields.io/twitter/follow/blackjacxxx?label=%40Blackjacxxx)](https://twitter.com/blackjacxxx)
+[![Version](https://shields.io/github/v/release/blackjacx/ASCKit?display_name=tag&include_prereleases&sort=semver)](https://github.com/Blackjacx/ASCKit/releases)
 [![Swift Package Manager Compatible](https://img.shields.io/badge/SPM-compatible-brightgreen.svg)](https://swift.org/package-manager/)
 [![Swift Versions](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2FBlackjacx%2FASCKit%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/Blackjacx/ASCKit)
 [![Platforms](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2FBlackjacx%2FASCKit%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/Blackjacx/ASCKit)
@@ -25,6 +25,31 @@ This is a package providing access to Apple's App Store Connect API. The idea wa
 
 I continuously evolve ASCKit as I require new functionality here. Please feel free to provide feedback or add new functionality by opening a PR.
 
+## Code Documentation
+
+The [code documentation](https://swiftpackageindex.com/Blackjacx/ASCKit/develop/documentation/asckit) is generated and hosted by [Swift Package Index](https://swiftpackageindex.com/) (powered by [DocC](https://developer.apple.com/documentation/docc))
+
+## Release
+
+To release this Swift package the following steps have to be taken:
+- Create a new branch `release-x.y.z`
+- Run `bash <(curl -H -s https://raw.githubusercontent.com/Blackjacx/Scripts/master/frameworks/bootstrap.sh)` to update to the latest shared development files
+- Run `bundle update` to update all Ruby gems
+- Commit all changes, make a PR and merge it to develop
+- Run `bundle exec fastlane release framework:"ASCKit" version:"x.y.z"` to release the new version
+- Post the following on Twitter
+```
+ASCKit release x.y.z 🎉
+
+▸ 🚀  Library package ASCKit (x.y.z) successfully published
+▸ 📅  September 2nd
+▸ 🌎  https://swiftpackageindex.com/Blackjacx/ASCKit
+▸ 🌎  https://github.com/Blackjacx/ASCKit/releases/latest
+▸ 👍  Tell your friends!
+
+#SPM #Apple #Development #AppStore #AppStoreConnect #AppStoreConnectAPI #Kit #Library #Package #Framework #Tools #Boilerplate #Code
+```
+
 ## Contribution
 
 - If you found a **bug**, please open an **issue**.
@@ -34,6 +59,14 @@ I continuously evolve ASCKit as I require new functionality here. Please feel fr
 ## Author
 
 [Stefan Herold](mailto:stefan.herold@gmail.com) • 🐦 [@Blackjacxxx](https://twitter.com/Blackjacxxx)
+
+## Contributors
+
+Thanks to all of you who are part of this:
+
+<a href="https://github.com/blackjacx/asckit/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=blackjacx/asckit" />
+</a>
 
 ## License
 

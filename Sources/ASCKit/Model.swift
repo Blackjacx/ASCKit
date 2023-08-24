@@ -14,8 +14,8 @@ public protocol Pageable: Model {
     associatedtype ModelType: Model
 
     var data: [ModelType] { get }
-    var totalCount: Int { get }
-    var limit: Int { get }
+    var totalCount: UInt { get }
+    var limit: UInt { get }
     var nextUrl: URL? { get }
 }
 
