@@ -33,7 +33,6 @@ The [code documentation](https://swiftpackageindex.com/Blackjacx/ASCKit/develop/
 
 To release this Swift package the following steps have to be taken:
 - Create a new branch `release-x.y.z`
-- Increment the version in https://github.com/Blackjacx/ASCKit/blob/develop/.spi.yml
 - Run `bash <(curl -H -s https://raw.githubusercontent.com/Blackjacx/Scripts/master/frameworks/bootstrap.sh)` to update to the latest shared development files
 - Run `bundle update` to update all Ruby gems
 - Commit all changes, make a PR and merge it to develop
