@@ -57,16 +57,16 @@ public struct ASCService {
 
     // MARK: - Creating Access Token
 
-    static func createAccessToken() throws -> String {
+    public static func createAccessToken(keyId: String? = specifiedKeyId) throws -> String {
 
         let key: ApiKey
 
         // Prefer key specified via parameter over activated one
-        if let specifiedKeyId = specifiedKeyId {
-            guard let specifiedKey = apiKeys.first(where: { $0.id == specifiedKeyId }) else {
-                throw AscError.apiKeyNotFound(specifiedKeyId)
+        if let keyId {
+            guard let matchingKey = apiKeys.first(where: { $0.id == keyId }) else {
+                throw AscError.apiKeyNotFound(keyId)
             }
-            key = specifiedKey
+            key = matchingKey
         } else if let activeKey = apiKeys.first(where: { $0.isActive }) {
             // Go with active API key
             key = activeKey
