@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+* [#12](https://github.com/Blackjacx/ASCKit/pull/12): Add token subcommand to keys - [@Blackjacx](https://github.com/blackjacx).
 
 ## [0.2.1] - 2023-08-24Z
 * Add log to show which tester is processed - [@Blackjacx](https://github.com/blackjacx).
