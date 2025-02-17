@@ -7,8 +7,7 @@
 
 import Foundation
 
-public protocol Model: Codable, Hashable {
-}
+public protocol Model: Codable, Hashable {}
 
 public protocol Pageable: Model {
     associatedtype ModelType: Model
@@ -42,21 +41,5 @@ extension Array where Self.Element: IdentifiableModel {
 
     var allNames: [String] {
         map { $0.name }
-    }
-
-    func allIds(for name: String?) -> [String] {
-        var filtered = self
-        if let name = name {
-            filtered = filter { $0.name.nbspFiltered() == name.nbspFiltered() }
-        }
-        return filtered.map { $0.id }
-    }
-
-    func allNames(for name: String?) -> [String] {
-        var filtered = self
-        if let name = name {
-            filtered = filter { $0.name.nbspFiltered() == name.nbspFiltered() }
-        }
-        return filtered.map { $0.name }
     }
 }
