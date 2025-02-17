@@ -2,13 +2,12 @@
 
 
 <!-- [![Test](https://github.com/Blackjacx/asckit/actions/workflows/test.yml/badge.svg)](https://github.com/Blackjacx/asckit/actions/workflows/test.yml) -->
-[![Twitter Follow](https://img.shields.io/badge/follow-%40blackjacx-1DA1F2?logo=twitter&style=for-the-badge)](https://twitter.com/intent/follow?original_referer=https%3A%2F%2Fgithub.com%2Fblackjacx&screen_name=Blackjacxxx)
+[![X Follow](https://img.shields.io/badge/follow-%40blackjacx-1DA1F2?logo=twitter&style=for-the-badge)](https://x.com/intent/follow?original_referer=https%3A%2F%2Fgithub.com%2Fblackjacx&screen_name=Blackjacxxx)
 [![Version](https://shields.io/github/v/release/blackjacx/ASCKit?display_name=tag&include_prereleases&sort=semver)](https://github.com/Blackjacx/ASCKit/releases)
 [![Swift Package Manager Compatible](https://img.shields.io/badge/SPM-compatible-brightgreen.svg)](https://swift.org/package-manager/)
 [![Swift Versions](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2FBlackjacx%2FASCKit%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/Blackjacx/ASCKit)
 [![Platforms](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2FBlackjacx%2FASCKit%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/Blackjacx/ASCKit)
-[![macOS 12+](https://img.shields.io/badge/macOS-12.0%2B-blue.svg)](https://developer.apple.com/download/)
-[![Xcode 14+](https://img.shields.io/badge/Xcode-14%2B-blue.svg)](https://developer.apple.com/download/)
+[![Xcode 16+](https://img.shields.io/badge/Xcode-14%2B-blue.svg)](https://developer.apple.com/download/)
 [![Codebeat](https://codebeat.co/badges/09488e6e-331e-4d7a-9238-3b2224cc8f04)](https://codebeat.co/projects/github-com-blackjacx-asckit-develop)
 [![License](https://img.shields.io/github/license/blackjacx/asckit.svg)](https://github.com/Blackjacx/asckit/blob/develop/LICENSE)
 [![Donate](https://img.shields.io/badge/Donate-PayPal-blue.svg?logo=paypal&style=for-the-badge)](https://www.paypal.me/STHEROLD)
