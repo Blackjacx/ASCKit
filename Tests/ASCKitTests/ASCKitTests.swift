@@ -1,26 +1,11 @@
-//
-//  ASCKitTests.swift
-//  ASCKit
-//
-//  Created by Stefan Herold on 19.11.20.
-//
-
 import Foundation
-import Quick
-import Nimble
-@testable import Engine
+import Testing
+@testable import ASCKit
 
-final class ASCKitTests: QuickSpec {
+@Suite()
+struct ASCKitTests {
 
-    override func spec() {
+    func ASCKitTests() async throws {
 
-        describe("ASCKit") {
-
-            beforeEach {
-            }
-
-            it("behaves like xyz") {
-            }
-        }
     }
 }
