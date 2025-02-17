@@ -57,7 +57,7 @@ public struct ASCService {
 
     // MARK: - Creating Access Token
 
-    public static func createAccessToken(keyId: String? = specifiedKeyId) throws -> String {
+    public static func createAccessToken(keyId: String? = specifiedKeyId) async throws -> String {
 
         let key: ApiKey
 
@@ -73,7 +73,11 @@ public struct ASCService {
         } else {
             throw AscError.noApiKeysRegistered
         }
-        return try JSONWebToken.create(privateKeySource: key.source, kid: key.id, iss: key.issuerId)
+        return try await JWT().create(
+            keySource: key.source,
+            header: ASCHeader(kid: key.id),
+            payload: ASCPayload(iss: key.issuerId)
+        )
     }
 
     // MARK: API Keys

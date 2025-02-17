@@ -11,8 +11,8 @@ import Engine
 
 public final class PagedItemLoader<Item: IdentifiableModel>: ObservableObject {
 
-    private (set) public var items: [Item] = []
-    private (set) public var pageableItems: PageableModel<Item>?
+    private(set) public var items: [Item] = []
+    private(set) public var pageableItems: PageableModel<Item>?
 
     private let filters: [Filter]
     private let limit: UInt?

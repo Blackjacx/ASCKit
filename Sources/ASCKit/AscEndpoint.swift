@@ -61,7 +61,7 @@ extension AscGenericEndpoint: Endpoint {
         /// For the URL path the following algorithm is used:
         /// - (Singular) Model name -> lowercase 1st letter -> append an 's' to pluralize it
         /// This yields the path name of the model and saves  lot of typing.
-        let base = "/\(apiVersion)/\(String(describing: type.self).lowercasedFirst())s"
+        let base = "/\(apiVersion)/\(String(describing: type.self).firstLowercased())s"
 
         guard let suffix = pathSuffix else {
             return base
@@ -95,7 +95,7 @@ extension AscGenericEndpoint: Endpoint {
 
         if shouldAuthorize {
             do {
-                let token = try ASCService.createAccessToken()
+                let token = try await ASCService.createAccessToken()
                 headers["Authorization"] = "Bearer \(token)"
             } catch {
                 print(error)
@@ -202,7 +202,7 @@ extension AscEndpoint: Endpoint {
 
         if shouldAuthorize {
             do {
-                let token = try ASCService.createAccessToken()
+                let token = try await ASCService.createAccessToken()
                 headers["Authorization"] = "Bearer \(token)"
             } catch {
                 print(error)

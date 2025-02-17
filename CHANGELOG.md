@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+## [0.3.0] - 2025-02-17Z
+* [#13](https://github.com/Blackjacx/ASCKit/pull/13): Implement Zero-Dependency JWT Generation - [@Blackjacx](https://github.com/blackjacx).
+
 ## [0.2.2] - 2023-08-28Z
 * [#12](https://github.com/Blackjacx/ASCKit/pull/12): Add token subcommand to keys - [@Blackjacx](https://github.com/blackjacx).
 

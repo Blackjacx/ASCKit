@@ -6,9 +6,8 @@
 //
 
 import Foundation
+import Engine
 
 public struct ASCKit {
 
-    /// Global keychain for all ASC related topics
-    public static var keychain = Keychain()
 }

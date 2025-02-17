@@ -1,66 +1,13 @@
 {
+  "originHash" : "23a02f7285e551ef2885678ec3d5885093eb4fc955c7b67f5570d968516ba6b3",
   "pins" : [
-    {
-      "identity" : "cwlcatchexception",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/mattgallagher/CwlCatchException.git",
-      "state" : {
-        "revision" : "35f9e770f54ce62dd8526470f14c6e137cef3eea",
-        "version" : "2.1.1"
-      }
-    },
-    {
-      "identity" : "cwlpreconditiontesting",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/mattgallagher/CwlPreconditionTesting.git",
-      "state" : {
-        "revision" : "c21f7bab5ca8eee0a9998bbd17ca1d0eb45d4688",
-        "version" : "2.1.0"
-      }
-    },
     {
       "identity" : "engine",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/blackjacx/Engine",
       "state" : {
-        "revision" : "611147d6c343f22ef13f9f99d322b9df8bebbfe7",
-        "version" : "0.0.4"
-      }
-    },
-    {
-      "identity" : "jwt-kit",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/vapor/jwt-kit.git",
-      "state" : {
-        "revision" : "87ce13a1df913ba4d51cf00606df7ef24d455571",
-        "version" : "4.7.0"
-      }
-    },
-    {
-      "identity" : "nimble",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/Quick/Nimble",
-      "state" : {
-        "revision" : "1f3bde57bde12f5e7b07909848c071e9b73d6edc",
-        "version" : "10.0.0"
-      }
-    },
-    {
-      "identity" : "quick",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/Quick/Quick",
-      "state" : {
-        "revision" : "f9d519828bb03dfc8125467d8f7b93131951124c",
-        "version" : "5.0.1"
-      }
-    },
-    {
-      "identity" : "swift-crypto",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/apple/swift-crypto.git",
-      "state" : {
-        "revision" : "d9825fa541df64b1a7b182178d61b9a82730d01f",
-        "version" : "2.1.0"
+        "revision" : "9797968aec667217cdd83a4e3b45972d4bf5a861",
+        "version" : "0.1.0"
       }
     },
     {
@@ -73,5 +20,5 @@
       }
     }
   ],
-  "version" : 2
+  "version" : 3
 }
