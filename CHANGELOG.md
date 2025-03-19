@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+
+## [0.4.0] - 2025-03-19Z
 * [#14](https://github.com/dbdrive/beiwagen/pull/14): Add missing app store version states - [@blackjacx](https://github.com/blackjacx). 
 
 ## [0.3.0] - 2025-02-17Z
