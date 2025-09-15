@@ -7,27 +7,27 @@ let package = Package(
         .macOS(.v13),
         .iOS(.v15),
         .tvOS(.v15),
-        .watchOS(.v8)
+        .watchOS(.v8),
     ],
     products: [
         .library(name: "ASCKit", targets: ["ASCKit"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/blackjacx/Engine", from: "0.1.0"),
-//        .package(path: "../Engine")
+        .package(url: "https://github.com/blackjacx/Engine", from: "0.2.0"),
+//        .package(path: "../Engine"),
     ],
     targets: [
         .target(
             name: "ASCKit",
             dependencies: [
-                "Engine"
+                "Engine",
             ]
         ),
         .testTarget(
             name: "ASCKitTests",
             dependencies: [
-                "ASCKit"
+                "ASCKit",
             ]
         ),
-    ]
+    ],
 )
