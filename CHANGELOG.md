@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.4.1] - 2025-09-15Z
+
 - [#15](https://github.com/dbdrive/beiwagen/pull/15): Bump Engine v0.2.0 - [@blackjacx](https://github.com/blackjacx).
 
 ## [0.4.0] - 2025-03-19Z
