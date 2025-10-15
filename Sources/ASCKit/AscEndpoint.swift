@@ -5,8 +5,8 @@
 //  Created by Stefan Herold on 27.05.20.
 //
 
-import Foundation
 import Engine
+import Foundation
 
 private let apiVersion: String = "v1"
 private let baseUrlPath = "api.appstoreconnect.apple.com"
@@ -22,6 +22,16 @@ enum AscEndpoint {
 
     case listAppStoreVersions(appId: String, filters: [Filter], limit: UInt?)
     case listAllBetaGroupsForTester(id: String, filters: [Filter], limit: UInt?)
+
+    case listAccessibilityDeclarations(appId: String, filters: [Filter], limit: UInt?)
+    case createAccessibilityDeclaration(
+        appId: String,
+        deviceFamily: AccessibilityDeclaration.DeviceFamily,
+        parameters: [String: Any],
+    )
+    case updateAccessibilityDeclaration(id: String, parameters: [String: Any])
+    case deleteAccessibilityDeclaration(id: String)
+    case publishAccessibilityDeclaration(id: String)
 
     case inviteBetaTester(testerId: String, appId: String)
     case addBetaTester(email: String, firstName: String, lastName: String, groupId: String)
@@ -79,7 +89,8 @@ extension AscGenericEndpoint: Endpoint {
 
     var method: HTTPMethod {
         switch self {
-        case .url, .list: return .get
+        case .url,
+             .list: return .get
         case .delete: return .delete
         }
     }
@@ -88,7 +99,7 @@ extension AscGenericEndpoint: Endpoint {
         30
     }
 
-    func headers() async -> [String : String]? {
+    func headers() async -> [String: String]? {
         var headers: [String: String] = [
             "Content-Type": "application/json",
         ]
@@ -104,7 +115,7 @@ extension AscGenericEndpoint: Endpoint {
         return headers
     }
 
-    var parameters: [String : Any]? {
+    var parameters: [String: Any]? {
         nil
     }
 
@@ -114,7 +125,8 @@ extension AscGenericEndpoint: Endpoint {
 
     func jsonDecode<T>(_ type: T.Type, from data: Data) throws -> T where T: Decodable {
         switch self {
-        case .url, .list:
+        case .url,
+             .list:
             let directResult = Result { try Json.decoder.decode(T.self, from: data) }
 
             guard (try? directResult.get()) != nil else {
@@ -133,7 +145,6 @@ extension AscGenericEndpoint: Endpoint {
 }
 
 extension AscEndpoint: Endpoint {
-
     var url: URL? {
         nil
     }
@@ -151,39 +162,77 @@ extension AscEndpoint: Endpoint {
 
     var path: String {
         switch self {
-        case .read(let url, _, _): return url.path
-        case .listAppStoreVersions(let appId, _, _): return "/\(apiVersion)/apps/\(appId)/appStoreVersions"
+        case let .read(url, _, _):
+            url.path
+        case let .listAppStoreVersions(appId, _, _):
+            "/\(apiVersion)/apps/\(appId)/appStoreVersions"
 
-        case .listAllBetaGroupsForTester(let id, _, _): return "/\(apiVersion)/betaTesters/\(id)/betaGroups"
-        case .inviteBetaTester: return "/\(apiVersion)/betaTesterInvitations"
-        case .addBetaTester: return "/\(apiVersion)/betaTesters"
+        case let .listAccessibilityDeclarations(appId, _, _):
+            "/\(apiVersion)/apps/\(appId)/accessibilityDeclarations"
+        case .createAccessibilityDeclaration:
+            "/\(apiVersion)/accessibilityDeclarations"
+        case let .updateAccessibilityDeclaration(id, _):
+            "/\(apiVersion)/accessibilityDeclarations/\(id)"
+        case let .deleteAccessibilityDeclaration(id):
+            "/\(apiVersion)/accessibilityDeclarations/\(id)"
+        case let .publishAccessibilityDeclaration(id):
+            "/\(apiVersion)/accessibilityDeclarations/\(id)"
 
-        case .registerBundleId: return "/\(apiVersion)/bundleIds"
+        case let .listAllBetaGroupsForTester(id, _, _):
+            "/\(apiVersion)/betaTesters/\(id)/betaGroups"
+        case .inviteBetaTester:
+            "/\(apiVersion)/betaTesterInvitations"
+        case .addBetaTester:
+            "/\(apiVersion)/betaTesters"
 
-        case .expireBuild(let build): return "/\(apiVersion)/builds/\(build.id)"
+        case .registerBundleId:
+            "/\(apiVersion)/bundleIds"
+
+        case let .expireBuild(build):
+            "/\(apiVersion)/builds/\(build.id)"
         }
     }
 
     var queryItems: [URLQueryItem] {
         switch self {
         case .read(_, let filters, let limit),
-                .listAppStoreVersions(_, let filters, let limit),
-                .listAllBetaGroupsForTester(_, let filters, let limit):
+             .listAppStoreVersions(_, let filters, let limit),
+             .listAccessibilityDeclarations(_, let filters, let limit),
+             .listAllBetaGroupsForTester(_, let filters, let limit):
             return queryItems(from: filters, limit: limit)
 
-        case .inviteBetaTester, .addBetaTester, .registerBundleId, .expireBuild:
+        case .inviteBetaTester,
+             .addBetaTester,
+
+             .createAccessibilityDeclaration,
+             .updateAccessibilityDeclaration,
+             .deleteAccessibilityDeclaration,
+             .publishAccessibilityDeclaration,
+
+             .registerBundleId,
+             .expireBuild:
             return []
         }
     }
 
     var method: HTTPMethod {
         switch self {
-        case .read, .listAppStoreVersions, .listAllBetaGroupsForTester:
-            return .get
-        case .addBetaTester, .inviteBetaTester, .registerBundleId:
-            return .post
-        case .expireBuild:
-            return .patch
+        case .read,
+             .listAppStoreVersions,
+             .listAccessibilityDeclarations,
+             .listAllBetaGroupsForTester:
+            .get
+        case .addBetaTester,
+             .createAccessibilityDeclaration,
+             .inviteBetaTester,
+             .registerBundleId:
+            .post
+        case .expireBuild,
+             .updateAccessibilityDeclaration,
+             .publishAccessibilityDeclaration:
+            .patch
+        case .deleteAccessibilityDeclaration:
+            .delete
         }
     }
 
@@ -195,7 +244,7 @@ extension AscEndpoint: Endpoint {
         true
     }
 
-    func headers() async -> [String : String]? {
+    func headers() async -> [String: String]? {
         var headers: [String: String] = [
             "Content-Type": "application/json",
         ]
@@ -211,10 +260,15 @@ extension AscEndpoint: Endpoint {
         return headers
     }
 
-    var parameters: [String : Any]? {
+    var parameters: [String: Any]? {
         switch self {
-        case .read, .listAppStoreVersions, .listAllBetaGroupsForTester:
+        case .read,
+             .listAppStoreVersions,
+             .listAccessibilityDeclarations,
+             .listAllBetaGroupsForTester,
+             .deleteAccessibilityDeclaration:
             return nil
+
         case let .addBetaTester(email, firstName, lastName, groupId):
             return [
                 "data": [
@@ -227,12 +281,56 @@ extension AscEndpoint: Endpoint {
                     "relationships": [
                         "betaGroups": [
                             "data": [
-                                [ "type": "betaGroups", "id": groupId ]
+                                ["type": "betaGroups", "id": groupId]
                             ]
                         ]
                     ]
                 ]
             ]
+
+        case let .createAccessibilityDeclaration(
+            appId,
+            deviceFamily,
+            parameters,
+        ):
+            var parameters = parameters
+            parameters["deviceFamily"] = deviceFamily.rawValue
+
+            return [
+                "data": [
+                    "type": "accessibilityDeclarations",
+                    "attributes": parameters,
+                    "relationships": [
+                        "app": [
+                            "data": [
+                                "type": "apps",
+                                "id": appId,
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+
+        case let .updateAccessibilityDeclaration(id, parameters):
+            return [
+                "data": [
+                    "type": "accessibilityDeclarations",
+                    "id": "\(id)",
+                    "attributes": parameters,
+                ]
+            ]
+
+        case let .publishAccessibilityDeclaration(id):
+            return [
+                "data": [
+                    "type": "accessibilityDeclarations",
+                    "id": "\(id)",
+                    "attributes": [
+                        "publish": true
+                    ],
+                ]
+            ]
+
         case let .inviteBetaTester(testerId, appId):
             return [
                 "data": [
@@ -253,6 +351,7 @@ extension AscEndpoint: Endpoint {
                     ]
                 ]
             ]
+
         case let .registerBundleId(bundleIdAttributes):
             var attributes: [String: Any] = [
                 "identifier": bundleIdAttributes.identifier,
@@ -270,16 +369,15 @@ extension AscEndpoint: Endpoint {
                     "attributes": attributes
                 ]
             ]
-        case let .expireBuild(build):
-            let attributes: [String: Any] = [
-                "expired": true
-            ]
 
+        case let .expireBuild(build):
             return [
                 "data": [
                     "id": "\(build.id)",
                     "type": "builds",
-                    "attributes": attributes
+                    "attributes": [
+                        "expired": true
+                    ]
                 ]
             ]
         }

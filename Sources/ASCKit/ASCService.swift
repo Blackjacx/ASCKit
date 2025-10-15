@@ -5,14 +5,14 @@
 //  Created by Stefan Herold on 27.05.20.
 //
 
-import Foundation
 import Engine
+import Foundation
 
 /// The central class to deal with the App Store Connect API. This object must
 /// be equally compatible with CLI tools and SwiftUI apps. As an example no
 /// code should be printed here what is the typical format of output for CLI
 /// tools. Better handle this in the commands CLI tool itself.
-public struct ASCService {
+public enum ASCService {
 
     static let network = Network.shared
 
@@ -28,9 +28,11 @@ public struct ASCService {
     /// the first page if nil.
     /// - note: Suitable for both CLI tools and SwiftUI apps
     /// - throws: NetworkError
-    public static func list<P: Pageable>(previousPageable: P?,
-                                         filters: [Filter] = [],
-                                         limit: UInt? = nil) async throws -> P {
+    public static func list<P: Pageable>(
+        previousPageable: P?,
+        filters: [Filter] = [],
+        limit: UInt? = nil
+    ) async throws -> P {
         let endpoint: AscGenericEndpoint<P.ModelType>
         if let nextUrl = previousPageable?.nextUrl {
             endpoint = AscGenericEndpoint.url(nextUrl, type: P.ModelType.self)
@@ -58,7 +60,6 @@ public struct ASCService {
     // MARK: - Creating Access Token
 
     public static func createAccessToken(keyId: String? = specifiedKeyId) async throws -> String {
-
         let key: ApiKey
 
         // Prefer key specified via parameter over activated one
@@ -88,8 +89,7 @@ public struct ASCService {
 
     @discardableResult
     public static func activateApiKey(id: String) throws -> ApiKey {
-
-        guard let matchingKey = Self.apiKeys.first(where: { $0.id == id }) else {
+        guard let matchingKey = apiKeys.first(where: { $0.id == id }) else {
             throw AscError.apiKeyNotFound(id)
         }
         Self.apiKeys.indices.forEach { Self.apiKeys[$0].isActive = Self.apiKeys[$0].id == matchingKey.id }
@@ -101,8 +101,7 @@ public struct ASCService {
     }
 
     public static func registerApiKey(key: ApiKey) throws -> ApiKey {
-
-        Self.apiKeys.append(key)
+        apiKeys.append(key)
         // Activate in case we don't have an active key
         if !hasActiveKey {
             try activateApiKey(id: key.id)
@@ -111,8 +110,7 @@ public struct ASCService {
     }
 
     public static func deleteApiKey(id: String) throws -> ApiKey {
-
-        guard let matchingKey = Self.apiKeys.first(where: { id == $0.id }) else {
+        guard let matchingKey = apiKeys.first(where: { id == $0.id }) else {
             throw AscError.apiKeyNotFound(id)
         }
         Self.apiKeys = Self.apiKeys.filter { $0.id != id }
@@ -123,22 +121,168 @@ public struct ASCService {
         apiKeys.contains { $0.isActive }
     }
 
+    // MARK: - AccessibilityDeclaration
+
+    @discardableResult
+    public static func listAccessibilityDeclarations(
+        appId: String,
+        filters: [Filter] = [],
+        limit: UInt? = nil
+    ) async throws -> [AccessibilityDeclaration] {
+        let endpoint = AscEndpoint.listAccessibilityDeclarations(
+            appId: appId,
+            filters: filters,
+            limit: limit
+        )
+
+        do {
+            return try await network.request(endpoint: endpoint)
+        } catch {
+            throw AscError.requestFailed(underlyingErrors: [error])
+        }
+    }
+
+    @discardableResult
+    public static func createAccessibilityDeclaration(
+        appId: String,
+        deviceFamily: AccessibilityDeclaration.DeviceFamily,
+        parameters: String,
+    ) async throws -> AccessibilityDeclaration {
+        let jsonObject = try Self.jsonObject(from: parameters)
+        guard let parameterDict = jsonObject as? [String: Any] else {
+            throw AscError.invalidInput("Expected dictionary, got \(jsonObject.self).")
+        }
+        let endpoint = AscEndpoint.createAccessibilityDeclaration(
+            appId: appId,
+            deviceFamily: deviceFamily,
+            parameters: parameterDict,
+        )
+        do {
+            return try await network.request(endpoint: endpoint)
+        } catch {
+            throw AscError.requestFailed(underlyingErrors: [error])
+        }
+    }
+
+    @discardableResult
+    public static func updateAccessibilityDeclaration(
+        id: String,
+        parameters: String,
+    ) async throws -> AccessibilityDeclaration {
+        let jsonObject = try Self.jsonObject(from: parameters)
+        guard let parameterDict = jsonObject as? [String: Any] else {
+            throw AscError.invalidInput("Expected dictionary, got \(jsonObject.self).")
+        }
+        let endpoint = AscEndpoint.updateAccessibilityDeclaration(
+            id: id,
+            parameters: parameterDict,
+        )
+        do {
+            return try await network.request(endpoint: endpoint)
+        } catch {
+            throw AscError.requestFailed(underlyingErrors: [error])
+        }
+    }
+
+    @discardableResult
+    public static func deleteAccessibilityDeclaration(
+        id: String,
+    ) async throws -> EmptyResponse {
+        let endpoint = AscEndpoint.deleteAccessibilityDeclaration(
+            id: id,
+        )
+        do {
+            return try await network.request(endpoint: endpoint)
+        } catch {
+            throw AscError.requestFailed(underlyingErrors: [error])
+        }
+    }
+
+    @discardableResult
+    public static func publishAccessibilityDeclaration(
+        id: String,
+    ) async throws -> AccessibilityDeclaration {
+        let endpoint = AscEndpoint.publishAccessibilityDeclaration(
+            id: id,
+        )
+        do {
+            return try await network.request(endpoint: endpoint)
+        } catch {
+            throw AscError.requestFailed(underlyingErrors: [error])
+        }
+    }
+
+    @discardableResult
+    public static func extendedPublishAccessibilityDeclaration(
+        appId: String,
+        deviceFamily: AccessibilityDeclaration.DeviceFamily,
+        parameters: String,
+    ) async throws -> [AccessibilityDeclaration] {
+        let jsonObject = try Self.jsonObject(from: parameters)
+        guard let parameterDict = jsonObject as? [String: Any] else {
+            throw AscError.invalidInput("Expected dictionary, got \(jsonObject.self).")
+        }
+        guard parameterDict["publish"] == nil else {
+            throw AscError
+                .invalidInput(
+                    "'publish' parameter is not allowed when publishing an accessibility declaration. It's automatically added"
+                )
+        }
+        guard !parameterDict.isEmpty else {
+            throw AscError.invalidInput("'parameters' should not be empty when publishing an accessibility declaration.")
+        }
+
+        let existingDraftDeclarations = try await listAccessibilityDeclarations(
+            appId: appId,
+            filters: [
+                Filter(
+                    key: AccessibilityDeclaration.FilterKey.state,
+                    value: AccessibilityDeclaration.State.draft.rawValue
+                )
+            ],
+        )
+        var publishedDeclarations: [AccessibilityDeclaration] = []
+
+        if existingDraftDeclarations.isEmpty {
+            let created = try await createAccessibilityDeclaration(
+                appId: appId,
+                deviceFamily: deviceFamily,
+                parameters: parameters,
+            )
+            publishedDeclarations.append(
+                try await publishAccessibilityDeclaration(id: created.id)
+            )
+        } else {
+            for draft in existingDraftDeclarations {
+                let updated = try await updateAccessibilityDeclaration(
+                    id: draft.id,
+                    parameters: parameters
+                )
+                publishedDeclarations.append(
+                    try await publishAccessibilityDeclaration(id: updated.id)
+                )
+            }
+        }
+
+        return publishedDeclarations
+    }
+
     // MARK: - Apps
 
     @discardableResult
-    public static func listAppStoreVersions(appIds: [String],
-                                            filters: [Filter] = [],
-                                            limit: UInt? = nil) async throws -> [(app: App, versions: [AppStoreVersion])] {
-
+    public static func listAppStoreVersions(
+        appIds: [String],
+        filters: [Filter] = [],
+        limit: UInt? = nil
+    ) async throws -> [(app: App, versions: [AppStoreVersion])] {
         typealias ResultType = (app: App, versions: [AppStoreVersion])
 
         let apps: [App] = try await list()
-        let iterableAppIds = appIds.count > 0 ? appIds : apps.map({ $0.id })
+        let iterableAppIds = appIds.count > 0 ? appIds : apps.map { $0.id }
         var results: [ResultType] = []
         var errors: [Error] = []
 
         await withTaskGroup(of: Result<ResultType, Error>.self) { group in
-
             for id in iterableAppIds {
                 let app = apps.first { $0.id == id }!
                 let endpoint = AscEndpoint.listAppStoreVersions(appId: id, filters: filters, limit: limit)
@@ -169,9 +313,11 @@ public struct ASCService {
 
     // MARK: - Beta Testers
 
-    public static func listBetaGroups(for betaTesters: [BetaTester],
-                                      filters: [Filter] = [],
-                                      limit: UInt? = nil) async throws -> [BetaGroup] {
+    public static func listBetaGroups(
+        for betaTesters: [BetaTester],
+        filters: [Filter] = [],
+        limit: UInt? = nil
+    ) async throws -> [BetaGroup] {
         typealias ResultType = [BetaGroup]
 
         var results: ResultType = []
@@ -179,9 +325,11 @@ public struct ASCService {
 
         await withTaskGroup(of: Result<ResultType, Error>.self) { group in
             for tester in betaTesters {
-                let endpoint = AscEndpoint.listAllBetaGroupsForTester(id: tester.id,
-                                                                      filters: filters,
-                                                                      limit: limit)
+                let endpoint = AscEndpoint.listAllBetaGroupsForTester(
+                    id: tester.id,
+                    filters: filters,
+                    limit: limit
+                )
 
                 group.addTask {
                     do {
@@ -209,12 +357,11 @@ public struct ASCService {
     }
 
     public static func inviteBetaTester(email: String, appIds: [String]) async throws {
-
         typealias ResultType = BetaTesterInvitationResponse
 
         let apps: [App] = try await list()
-        let iterableAppIds = appIds.count > 0 ? appIds : apps.map({ $0.id })
-        guard iterableAppIds.count > 0 else {
+        let iterableAppIds = appIds.count > 0 ? appIds : apps.map { $0.id }
+        guard !iterableAppIds.isEmpty else {
             throw AscError.noDataProvided("app_ids")
         }
 
@@ -256,7 +403,6 @@ public struct ASCService {
     }
 
     public static func addBetaTester(email: String, first: String, last: String, groupNames: [String]) async throws {
-
         typealias ResultType = BetaTester
 
         // create filters for group names
@@ -275,7 +421,9 @@ public struct ASCService {
                 group.addTask {
                     do {
                         let result: ResultType = try await network.request(endpoint: endpoint)
-                        print("Added tester: \(result.name), email: \(email), id: \(result.id) to group: \(betaGroup.name), id: \(betaGroup.id)")
+                        print(
+                            "Added tester: \(result.name), email: \(email), id: \(result.id) to group: \(betaGroup.name), id: \(betaGroup.id)"
+                        )
                         return .success(result)
                     } catch {
                         print("Failed adding tester \(email) to group \(betaGroup.name) (\(betaGroup.id))")
@@ -313,7 +461,7 @@ public struct ASCService {
 
         for filter in filters {
             print("Processing beta tester for filter: \(filter)")
-            
+
             // Get IDs of the beta testers
             // We have to search for each filter separately as each filter might
             // refer to a different tester.
@@ -356,11 +504,12 @@ public struct ASCService {
 
     // MARK: BundleIDs
 
-    public static func registerBundleId(_ identifier: String,
-                                        name: String,
-                                        platform: BundleId.Platform,
-                                        seedId: String? = nil) async throws -> BundleId {
-
+    public static func registerBundleId(
+        _ identifier: String,
+        name: String,
+        platform: BundleId.Platform,
+        seedId: String? = nil
+    ) async throws -> BundleId {
         let attributes = BundleId.Attributes(identifier: identifier, name: name, platform: platform, seedId: seedId)
         let endpoint = AscEndpoint.registerBundleId(attributes: attributes)
         let bundleId: BundleId = try await network.request(endpoint: endpoint)
@@ -368,7 +517,6 @@ public struct ASCService {
     }
 
     public static func deleteBundleId(_ id: String) async throws -> BundleId {
-
         // Get id's
         let filter = Filter(key: BundleId.FilterKey.identifier, value: id)
         let ids: [BundleId] = try await ASCService.list(filters: [filter], limit: nil)
@@ -383,7 +531,6 @@ public struct ASCService {
     // MARK: Builds
 
     public static func expireBuilds(ids: [String]) async throws -> [Build] {
-
         typealias ResultType = Build
 
         let filters: [Filter]
@@ -431,5 +578,19 @@ public struct ASCService {
         }
 
         return results
+    }
+
+    // MARK: - Helpers
+
+    static func jsonObject(from jsonString: String) throws -> Any {
+        guard let data = jsonString.data(using: .utf8) else {
+            throw AscError.jsonStringToDataConversionFailed(jsonString)
+        }
+
+        do {
+            return try JSONSerialization.jsonObject(with: data)
+        } catch {
+            throw AscError.dataToJsonObjectConversionFailed(data)
+        }
     }
 }
