@@ -21,6 +21,9 @@ enum AscEndpoint {
     case read(url: URL, filters: [Filter], limit: UInt?)
 
     case listAppStoreVersions(appId: String, filters: [Filter], limit: UInt?)
+
+    case listAppInfos(appId: String, limit: UInt?)
+
     case listAllBetaGroupsForTester(id: String, filters: [Filter], limit: UInt?)
 
     case listAccessibilityDeclarations(appId: String, filters: [Filter], limit: UInt?)
@@ -167,6 +170,9 @@ extension AscEndpoint: Endpoint {
         case let .listAppStoreVersions(appId, _, _):
             "/\(apiVersion)/apps/\(appId)/appStoreVersions"
 
+        case let .listAppInfos(appId, limit):
+            "/\(apiVersion)/apps/\(appId)/appInfos"
+
         case let .listAccessibilityDeclarations(appId, _, _):
             "/\(apiVersion)/apps/\(appId)/accessibilityDeclarations"
         case .createAccessibilityDeclaration:
@@ -201,6 +207,9 @@ extension AscEndpoint: Endpoint {
              .listAllBetaGroupsForTester(_, let filters, let limit):
             return queryItems(from: filters, limit: limit)
 
+        case .listAppInfos(_, let limit):
+            return queryItems(from: [], limit: limit)
+
         case .inviteBetaTester,
              .addBetaTester,
 
@@ -219,6 +228,7 @@ extension AscEndpoint: Endpoint {
         switch self {
         case .read,
              .listAppStoreVersions,
+             .listAppInfos,
              .listAccessibilityDeclarations,
              .listAllBetaGroupsForTester:
             .get
@@ -264,6 +274,7 @@ extension AscEndpoint: Endpoint {
         switch self {
         case .read,
              .listAppStoreVersions,
+             .listAppInfos,
              .listAccessibilityDeclarations,
              .listAllBetaGroupsForTester,
              .deleteAccessibilityDeclaration:
