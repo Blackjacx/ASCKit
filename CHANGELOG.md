@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.5.0] - 2025-10-23Z
+
 - [#20](https://github.com/dbdrive/beiwagen/pull/20): Add support for Accessibility Declaration management - [@blackjacx](https://github.com/blackjacx).
 
 ## [0.4.1] - 2025-09-15Z
