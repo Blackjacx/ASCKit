@@ -14,6 +14,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/blackjacx/Engine", from: "0.3.0"),
+//        .package(url: "https://github.com/blackjacx/Engine", branch: "develop"),
 //        .package(path: "../Engine"),
     ],
     targets: [

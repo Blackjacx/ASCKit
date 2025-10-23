@@ -717,6 +717,28 @@ public enum ASCService {
         return results
     }
 
+    // MARK: - App Infos
+
+    @discardableResult
+    public static func listAppInfos(
+        appId: String,
+        limit: UInt? = nil,
+        outputType: OutputType,
+    ) async throws -> [AppInfos] {
+        let endpoint = AscEndpoint.listAppInfos(
+            appId: appId,
+            limit: limit
+        )
+        do {
+            return try await network.request(
+                endpoint: endpoint,
+                outputType: outputType,
+            )
+        } catch {
+            throw AscError.requestFailed(underlyingErrors: [error])
+        }
+    }
+
     // MARK: - Helpers
 
     static func jsonObject(from jsonString: String) throws -> Any {
