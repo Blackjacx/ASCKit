@@ -16,6 +16,7 @@ public final class PagedItemLoader<Item: IdentifiableModel>: ObservableObject {
 
     private let filters: [Filter]
     private let limit: UInt?
+    private let outputType: OutputType
 
     private var network = Network.shared
     private var canLoadMorePages = true
@@ -26,9 +27,10 @@ public final class PagedItemLoader<Item: IdentifiableModel>: ObservableObject {
     ///   - limit: The maximum size of one page of items AND the amount of
     ///   items to load. Specify `nil` if you want to load all pages. In that
     ///   case the page size will be the Apple default.
-    public init(filters: [Filter] = [], limit: UInt?) {
+    public init(filters: [Filter] = [], limit: UInt?, outputType: OutputType) {
         self.filters = filters
         self.limit = limit
+        self.outputType = outputType
     }
 
     /// - throws: NetworkError
@@ -48,9 +50,12 @@ public final class PagedItemLoader<Item: IdentifiableModel>: ObservableObject {
             return
         }
 
-        let pageableResult = try await ASCService.list(previousPageable: pageableItems,
-                                                       filters: filters,
-                                                       limit: limit)
+        let pageableResult = try await ASCService.list(
+            previousPageable: pageableItems,
+            filters: filters,
+            limit: limit,
+            outputType: outputType,
+        )
 
         items += pageableResult.data
         pageableItems = pageableResult

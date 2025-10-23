@@ -33,25 +33,33 @@ The [code documentation](https://swiftpackageindex.com/Blackjacx/ASCKit/develop/
 To release this Swift package the following steps have to be taken:
 
 - First, make sure all your feature branches/PRs are merged
-- Checkout develop and run `git pull`
-- Run `bash <(curl -H -s https://raw.githubusercontent.com/Blackjacx/Scripts/master/frameworks/bootstrap.sh)` to update to the latest shared development files
-- Commit using `git commit -am "chore: run bootstrap.sh"`
+- Checkout develop and pull:
+  ```shell
+  git checkout develop && git pull
+  ```
+- Update to the latest shared development files:
+  ```shell
+  bash <(curl -H -s https://raw.githubusercontent.com/Blackjacx/Scripts/main/frameworks/bootstrap.sh)
+  ```
 - Run `bundle update` to update all Ruby gems
-- Commit using `git commit -am "chore: update gems"`
+- Run `swift package update` to update all SPM dependencies
+- Commit all changes on `develop` using:
+  ```
+  git commit -am "Release version 'x.y.z'"
+  ```
 - Run `bundle exec fastlane release framework:"ASCKit" version:"x.y.z"` to release the new version
-- Post the following on Twitter
+- Post the following on Twitter:
+  ```
+  ASCKit release x.y.z 🎉
 
-```
-ASCKit release x.y.z 🎉
+  ▸ 🚀  Library package ASCKit successfully published
+  ▸ 📅  August 24th
+  ▸ 🌎  https://swiftpackageindex.com/Blackjacx/ASCKit
+  ▸ 🌎  https://github.com/Blackjacx/ASCKit/releases/latest
+  ▸ 👍  Tell your friends!
 
-▸ 🚀  Library package ASCKit successfully published
-▸ 📅  August 24th
-▸ 🌎  https://swiftpackageindex.com/Blackjacx/ASCKit
-▸ 🌎  https://github.com/Blackjacx/ASCKit/releases/latest
-▸ 👍  Tell your friends!
-
-#SPM #Apple #Development #AppStore #AppStoreConnect #API #Library #Package #Tools
-```
+  #SPM #Apple #Development #AppStore #AppStoreConnect #API #Library #Package #Tools
+  ```
 
 ## Contribution
 

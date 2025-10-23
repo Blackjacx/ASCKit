@@ -31,7 +31,8 @@ public enum ASCService {
     public static func list<P: Pageable>(
         previousPageable: P?,
         filters: [Filter] = [],
-        limit: UInt? = nil
+        limit: UInt? = nil,
+        outputType: OutputType,
     ) async throws -> P {
         let endpoint: AscGenericEndpoint<P.ModelType>
         if let nextUrl = previousPageable?.nextUrl {
@@ -39,22 +40,39 @@ public enum ASCService {
         } else {
             endpoint = AscGenericEndpoint.list(type: P.ModelType.self, filters: filters, limit: limit)
         }
-        return try await network.request(endpoint: endpoint)
+        return try await network.request(
+            endpoint: endpoint,
+            outputType: outputType,
+        )
     }
 
     /// Generic, throwable function to return any list of `IdentifiableModel`s.
     /// - note: Suitable for CLI tools
-    public static func list<P: IdentifiableModel>(filters: [Filter] = [], limit: UInt? = nil) async throws -> [P] {
-        let loader = PagedItemLoader<P>(filters: filters, limit: limit)
+    public static func list<P: IdentifiableModel>(
+        filters: [Filter] = [],
+        limit: UInt? = nil,
+        outputType: OutputType,
+    ) async throws -> [P] {
+        let loader = PagedItemLoader<P>(
+            filters: filters,
+            limit: limit,
+            outputType: outputType,
+        )
         try await loader.loadMoreIfNeeded()
         return loader.items
     }
 
     // MARK: Generic Delete
 
-    public static func delete<M: IdentifiableModel>(model: M) async throws -> EmptyResponse {
+    public static func delete<M: IdentifiableModel>(
+        model: M,
+        outputType: OutputType,
+    ) async throws -> EmptyResponse {
         let endpoint = AscGenericEndpoint.delete(type: M.self, id: model.id)
-        return try await network.request(endpoint: endpoint)
+        return try await network.request(
+            endpoint: endpoint,
+            outputType: outputType,
+        )
     }
 
     // MARK: - Creating Access Token
@@ -127,7 +145,8 @@ public enum ASCService {
     public static func listAccessibilityDeclarations(
         appId: String,
         filters: [Filter] = [],
-        limit: UInt? = nil
+        limit: UInt? = nil,
+        outputType: OutputType,
     ) async throws -> [AccessibilityDeclaration] {
         let endpoint = AscEndpoint.listAccessibilityDeclarations(
             appId: appId,
@@ -136,7 +155,10 @@ public enum ASCService {
         )
 
         do {
-            return try await network.request(endpoint: endpoint)
+            return try await network.request(
+                endpoint: endpoint,
+                outputType: outputType,
+            )
         } catch {
             throw AscError.requestFailed(underlyingErrors: [error])
         }
@@ -147,6 +169,7 @@ public enum ASCService {
         appId: String,
         deviceFamily: AccessibilityDeclaration.DeviceFamily,
         parameters: String,
+        outputType: OutputType,
     ) async throws -> AccessibilityDeclaration {
         let jsonObject = try Self.jsonObject(from: parameters)
         guard let parameterDict = jsonObject as? [String: Any] else {
@@ -158,7 +181,10 @@ public enum ASCService {
             parameters: parameterDict,
         )
         do {
-            return try await network.request(endpoint: endpoint)
+            return try await network.request(
+                endpoint: endpoint,
+                outputType: outputType,
+            )
         } catch {
             throw AscError.requestFailed(underlyingErrors: [error])
         }
@@ -168,6 +194,7 @@ public enum ASCService {
     public static func updateAccessibilityDeclaration(
         id: String,
         parameters: String,
+        outputType: OutputType,
     ) async throws -> AccessibilityDeclaration {
         let jsonObject = try Self.jsonObject(from: parameters)
         guard let parameterDict = jsonObject as? [String: Any] else {
@@ -178,7 +205,10 @@ public enum ASCService {
             parameters: parameterDict,
         )
         do {
-            return try await network.request(endpoint: endpoint)
+            return try await network.request(
+                endpoint: endpoint,
+                outputType: outputType,
+            )
         } catch {
             throw AscError.requestFailed(underlyingErrors: [error])
         }
@@ -187,12 +217,16 @@ public enum ASCService {
     @discardableResult
     public static func deleteAccessibilityDeclaration(
         id: String,
+        outputType: OutputType,
     ) async throws -> EmptyResponse {
         let endpoint = AscEndpoint.deleteAccessibilityDeclaration(
             id: id,
         )
         do {
-            return try await network.request(endpoint: endpoint)
+            return try await network.request(
+                endpoint: endpoint,
+                outputType: outputType,
+            )
         } catch {
             throw AscError.requestFailed(underlyingErrors: [error])
         }
@@ -201,12 +235,16 @@ public enum ASCService {
     @discardableResult
     public static func publishAccessibilityDeclaration(
         id: String,
+        outputType: OutputType,
     ) async throws -> AccessibilityDeclaration {
         let endpoint = AscEndpoint.publishAccessibilityDeclaration(
             id: id,
         )
         do {
-            return try await network.request(endpoint: endpoint)
+            return try await network.request(
+                endpoint: endpoint,
+                outputType: outputType,
+            )
         } catch {
             throw AscError.requestFailed(underlyingErrors: [error])
         }
@@ -217,6 +255,7 @@ public enum ASCService {
         appId: String,
         deviceFamily: AccessibilityDeclaration.DeviceFamily,
         parameters: String,
+        outputType: OutputType,
     ) async throws -> [AccessibilityDeclaration] {
         let jsonObject = try Self.jsonObject(from: parameters)
         guard let parameterDict = jsonObject as? [String: Any] else {
@@ -240,6 +279,7 @@ public enum ASCService {
                     value: AccessibilityDeclaration.State.draft.rawValue
                 )
             ],
+            outputType: .none,
         )
         var publishedDeclarations: [AccessibilityDeclaration] = []
 
@@ -248,18 +288,26 @@ public enum ASCService {
                 appId: appId,
                 deviceFamily: deviceFamily,
                 parameters: parameters,
+                outputType: .none,
             )
             publishedDeclarations.append(
-                try await publishAccessibilityDeclaration(id: created.id)
+                try await publishAccessibilityDeclaration(
+                    id: created.id,
+                    outputType: outputType,
+                )
             )
         } else {
             for draft in existingDraftDeclarations {
                 let updated = try await updateAccessibilityDeclaration(
                     id: draft.id,
-                    parameters: parameters
+                    parameters: parameters,
+                    outputType: .none,
                 )
                 publishedDeclarations.append(
-                    try await publishAccessibilityDeclaration(id: updated.id)
+                    try await publishAccessibilityDeclaration(
+                        id: updated.id,
+                        outputType: outputType,
+                    )
                 )
             }
         }
@@ -273,11 +321,12 @@ public enum ASCService {
     public static func listAppStoreVersions(
         appIds: [String],
         filters: [Filter] = [],
-        limit: UInt? = nil
+        limit: UInt? = nil,
+        outputType: OutputType,
     ) async throws -> [(app: App, versions: [AppStoreVersion])] {
         typealias ResultType = (app: App, versions: [AppStoreVersion])
 
-        let apps: [App] = try await list()
+        let apps: [App] = try await list(outputType: .none)
         let iterableAppIds = appIds.count > 0 ? appIds : apps.map { $0.id }
         var results: [ResultType] = []
         var errors: [Error] = []
@@ -289,7 +338,15 @@ public enum ASCService {
 
                 group.addTask {
                     do {
-                        return .success((app, versions: try await network.request(endpoint: endpoint)))
+                        return .success(
+                            (
+                                app,
+                                versions: try await network.request(
+                                    endpoint: endpoint,
+                                    outputType: outputType,
+                                )
+                            )
+                        )
                     } catch {
                         return .failure(error)
                     }
@@ -316,7 +373,8 @@ public enum ASCService {
     public static func listBetaGroups(
         for betaTesters: [BetaTester],
         filters: [Filter] = [],
-        limit: UInt? = nil
+        limit: UInt? = nil,
+        outputType: OutputType,
     ) async throws -> [BetaGroup] {
         typealias ResultType = [BetaGroup]
 
@@ -333,8 +391,12 @@ public enum ASCService {
 
                 group.addTask {
                     do {
-                        let result: ResultType = try await network.request(endpoint: endpoint)
-                        return .success(result)
+                        return .success(
+                            try await network.request(
+                                endpoint: endpoint,
+                                outputType: outputType,
+                            )
+                        )
                     } catch {
                         return .failure(error)
                     }
@@ -356,16 +418,23 @@ public enum ASCService {
         return results
     }
 
-    public static func inviteBetaTester(email: String, appIds: [String]) async throws {
+    public static func inviteBetaTester(
+        email: String,
+        appIds: [String],
+        outputType: OutputType,
+    ) async throws {
         typealias ResultType = BetaTesterInvitationResponse
 
-        let apps: [App] = try await list()
+        let apps: [App] = try await list(outputType: .none)
         let iterableAppIds = appIds.count > 0 ? appIds : apps.map { $0.id }
         guard !iterableAppIds.isEmpty else {
             throw AscError.noDataProvided("app_ids")
         }
 
-        guard let tester: BetaTester = try await list(filters: [Filter(key: BetaTester.FilterKey.email, value: email)]).first else {
+        guard let tester: BetaTester = try await list(
+            filters: [Filter(key: BetaTester.FilterKey.email, value: email)],
+            outputType: .none,
+        ).first else {
             throw AscError.noUserFound(email)
         }
 
@@ -374,16 +443,22 @@ public enum ASCService {
 
         await withTaskGroup(of: Result<ResultType, Error>.self) { group in
             for id in iterableAppIds {
-                let app = apps.first { id == $0.id }!
                 let endpoint = AscEndpoint.inviteBetaTester(testerId: tester.id, appId: id)
 
                 group.addTask {
                     do {
-                        let result: ResultType = try await network.request(endpoint: endpoint)
-                        print("Invited tester \(tester.name)  (\(tester.id)) to app \(app.name) (\(id))")
-                        return .success(result)
+                        // FIXME: 🟢 convert to category-scoped OSLog outoput
+//                        let app = apps.first { id == $0.id }!
+//                        print("Invited tester \(tester.name)  (\(tester.id)) to app \(app.name) (\(id))")
+                        return .success(
+                            try await network.request(
+                                endpoint: endpoint,
+                                outputType: outputType,
+                            )
+                        )
                     } catch {
-                        print("Failed inviting tester \(tester.name) (\(tester.id)) to app \(app.name) (\(id))")
+                        // FIXME: 🟢 convert to category-scoped OSLog outoput
+//                        print("Failed inviting tester \(tester.name) (\(tester.id)) to app \(app.name) (\(id))")
                         return .failure(error)
                     }
                 }
@@ -402,31 +477,51 @@ public enum ASCService {
         }
     }
 
-    public static func addBetaTester(email: String, first: String, last: String, groupNames: [String]) async throws {
+    public static func addBetaTester(
+        email: String,
+        first: String,
+        last: String,
+        groupNames: [String],
+        outputType: OutputType,
+    ) async throws {
         typealias ResultType = BetaTester
 
         // create filters for group names
         let groupFilters: [Filter] = [
             Filter(key: BetaGroup.FilterKey.name, value: groupNames.joined(separator: ","))
         ]
-        let betaGroups: [BetaGroup] = try await list(filters: groupFilters)
+        let betaGroups: [BetaGroup] = try await list(
+            filters: groupFilters,
+            outputType: .none,
+        )
 
         var results: [ResultType] = []
         var errors: [Error] = []
 
         await withTaskGroup(of: Result<ResultType, Error>.self) { group in
             for betaGroup in betaGroups {
-                let endpoint = AscEndpoint.addBetaTester(email: email, firstName: first, lastName: last, groupId: betaGroup.id)
+                let endpoint = AscEndpoint.addBetaTester(
+                    email: email,
+                    firstName: first,
+                    lastName: last,
+                    groupId: betaGroup.id
+                )
 
                 group.addTask {
                     do {
-                        let result: ResultType = try await network.request(endpoint: endpoint)
-                        print(
-                            "Added tester: \(result.name), email: \(email), id: \(result.id) to group: \(betaGroup.name), id: \(betaGroup.id)"
+                        // FIXME: 🟢 convert to category-scoped OSLog outoput
+//                        print(
+//                            "Added tester: \(result.name), email: \(email), id: \(result.id) to group: \(betaGroup.name), id: \(betaGroup.id)"
+//                        )
+                        return .success(
+                            try await network.request(
+                                endpoint: endpoint,
+                                outputType: outputType,
+                            )
                         )
-                        return .success(result)
                     } catch {
-                        print("Failed adding tester \(email) to group \(betaGroup.name) (\(betaGroup.id))")
+                        // FIXME: 🟢 convert to category-scoped OSLog outoput
+//                        print("Failed adding tester \(email) to group \(betaGroup.name) (\(betaGroup.id))")
                         return .failure(error)
                     }
                 }
@@ -455,17 +550,25 @@ public enum ASCService {
     ///    -f "firstName=Stefan"
     ///    -f "email=john.doe@ioki.com"
     ///    -f "email=jane.doe@ioki.com"
-    public static func deleteBetaTesters(filters: [Filter]) async throws -> [BetaTester] {
-        let allValidBetaGroups: [BetaGroup] = try await list()
+    @discardableResult
+    public static func deleteBetaTesters(
+        filters: [Filter],
+        outputType: OutputType,
+    ) async throws -> [BetaTester] {
+        let allValidBetaGroups: [BetaGroup] = try await list(outputType: .none)
         var allDeletedTesters: [BetaTester] = []
 
         for filter in filters {
-            print("Processing beta tester for filter: \(filter)")
+            // FIXME: 🟢 convert to category-scoped OSLog outoput
+//            print("Processing beta tester for filter: \(filter)")
 
             // Get IDs of the beta testers
             // We have to search for each filter separately as each filter might
             // refer to a different tester.
-            let testers: [BetaTester] = try await list(filters: [filter])
+            let testers: [BetaTester] = try await list(
+                filters: [filter],
+                outputType: .none,
+            )
 
             // Either we can delete groups below or we cannot, because they are
             // somehow fucked up in Apple's database like the ones below. In the
@@ -484,8 +587,10 @@ public enum ASCService {
             //        {
             //            "id": "917ccfe3-8508-43cc-b9e7-5b60eaa33f7b"
             //        }
-            let allValidTesterGroups: [BetaGroup] = try await listBetaGroups(for: testers)
-                .filter { allValidBetaGroups.map(\.id).contains($0.id) }
+            let allValidTesterGroups: [BetaGroup] = try await listBetaGroups(
+                for: testers,
+                outputType: .none,
+            ).filter { allValidBetaGroups.map(\.id).contains($0.id) }
 
             guard !testers.isEmpty && !allValidTesterGroups.isEmpty else {
                 // Skip deletion when no testers have been found
@@ -493,7 +598,10 @@ public enum ASCService {
             }
 
             for tester in testers {
-                _ = try await delete(model: tester)
+                _ = try await delete(
+                    model: tester,
+                    outputType: outputType,
+                )
             }
 
             allDeletedTesters += testers
@@ -504,33 +612,56 @@ public enum ASCService {
 
     // MARK: BundleIDs
 
+    @discardableResult
     public static func registerBundleId(
         _ identifier: String,
         name: String,
         platform: BundleId.Platform,
-        seedId: String? = nil
+        seedId: String? = nil,
+        outputType: OutputType,
     ) async throws -> BundleId {
-        let attributes = BundleId.Attributes(identifier: identifier, name: name, platform: platform, seedId: seedId)
+        let attributes = BundleId.Attributes(
+            identifier: identifier,
+            name: name,
+            platform: platform,
+            seedId: seedId
+        )
         let endpoint = AscEndpoint.registerBundleId(attributes: attributes)
-        let bundleId: BundleId = try await network.request(endpoint: endpoint)
+        let bundleId: BundleId = try await network.request(
+            endpoint: endpoint,
+            outputType: outputType,
+        )
         return bundleId
     }
 
-    public static func deleteBundleId(_ id: String) async throws -> BundleId {
+    @discardableResult
+    public static func deleteBundleId(
+        _ id: String,
+        outputType: OutputType,
+    ) async throws -> BundleId {
         // Get id's
         let filter = Filter(key: BundleId.FilterKey.identifier, value: id)
-        let ids: [BundleId] = try await ASCService.list(filters: [filter], limit: nil)
-
+        let ids: [BundleId] = try await ASCService.list(
+            filters: [filter],
+            limit: nil,
+            outputType: .none,
+        )
         guard let firstId = ids.first else {
             throw AscError.noBundleIdFound(id)
         }
-        _ = try await delete(model: firstId)
+        _ = try await delete(
+            model: firstId,
+            outputType: outputType,
+        )
         return firstId
     }
 
     // MARK: Builds
 
-    public static func expireBuilds(ids: [String]) async throws -> [Build] {
+    public static func expireBuilds(
+        ids: [String],
+        outputType: OutputType,
+    ) async throws -> [Build] {
         typealias ResultType = Build
 
         let filters: [Filter]
@@ -541,7 +672,10 @@ public enum ASCService {
             filters = ids.map { Filter(key: Build.FilterKey.id, value: $0) }
         }
 
-        let nonExpiredBuilds: [Build] = try await list(filters: filters)
+        let nonExpiredBuilds: [Build] = try await list(
+            filters: filters,
+            outputType: .none
+        )
 
         guard !nonExpiredBuilds.isEmpty else {
             throw AscError.noBuildsFound
@@ -556,8 +690,12 @@ public enum ASCService {
 
                 group.addTask {
                     do {
-                        let result: ResultType = try await network.request(endpoint: endpoint)
-                        return .success(result)
+                        return .success(
+                            try await network.request(
+                                endpoint: endpoint,
+                                outputType: outputType,
+                            )
+                        )
                     } catch {
                         return .failure(error)
                     }
@@ -573,7 +711,6 @@ public enum ASCService {
         }
 
         if !errors.isEmpty {
-            #warning("In case of error attach successful builds to the error so the user knows that something HAS been expired.")
             throw AscError.requestFailed(underlyingErrors: errors)
         }
 
