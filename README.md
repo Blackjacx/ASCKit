@@ -49,7 +49,6 @@ To release this Swift package the following steps have to be taken:
   ```
 - Run `bundle exec fastlane release framework:"ASCKit" version:"x.y.z"` to release the new version
 - Post the following on Twitter:
-
   ```
   ASCKit release x.y.z 🎉
 
