@@ -1,13 +1,13 @@
 {
-  "originHash" : "92d8d781f40a39a8562da3e0924147a986a7302c14422e3019a6150d3ccb3e69",
+  "originHash" : "2da71bbcb64bde0cb354fd9e1a9a2f3fff5c5e098a332cdf57087aa12c133433",
   "pins" : [
     {
       "identity" : "engine",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/blackjacx/Engine",
       "state" : {
-        "revision" : "bcef89ba00b09552c8e0eb369d6892ce3ef338f6",
-        "version" : "0.2.0"
+        "revision" : "4ad8dc574e88b8dbcd02ad31e4eaae63b21c64ec",
+        "version" : "0.3.0"
       }
     },
     {
