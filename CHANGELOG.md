@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- [#20](https://github.com/dbdrive/beiwagen/pull/20): Add support for Accessibility Declaration management - [@blackjacx](https://github.com/blackjacx).
+
 ## [0.4.1] - 2025-09-15Z
 
 - [#15](https://github.com/dbdrive/beiwagen/pull/15): Bump Engine v0.2.0 - [@blackjacx](https://github.com/blackjacx).
