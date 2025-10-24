@@ -24,6 +24,9 @@ enum AscEndpoint {
 
     case listAppInfos(appId: String, limit: UInt?)
 
+    case getAgeRatings(appInfoId: String)
+    case updateAgeRatings(ageRatingDeclarationId: String, parameters: [String: Any])
+
     case listAllBetaGroupsForTester(id: String, filters: [Filter], limit: UInt?)
 
     case listAccessibilityDeclarations(appId: String, filters: [Filter], limit: UInt?)
@@ -173,6 +176,11 @@ extension AscEndpoint: Endpoint {
         case let .listAppInfos(appId, limit):
             "/\(apiVersion)/apps/\(appId)/appInfos"
 
+        case let .getAgeRatings(appInfoId):
+            "/\(apiVersion)/appInfos/\(appInfoId)/ageRatingDeclaration"
+        case let .updateAgeRatings(ageRatingDeclarationId, _):
+            "/\(apiVersion)/ageRatingDeclarations/\(ageRatingDeclarationId)"
+
         case let .listAccessibilityDeclarations(appId, _, _):
             "/\(apiVersion)/apps/\(appId)/accessibilityDeclarations"
         case .createAccessibilityDeclaration:
@@ -213,12 +221,16 @@ extension AscEndpoint: Endpoint {
         case .inviteBetaTester,
              .addBetaTester,
 
+             .getAgeRatings,
+             .updateAgeRatings,
+
              .createAccessibilityDeclaration,
              .updateAccessibilityDeclaration,
              .deleteAccessibilityDeclaration,
              .publishAccessibilityDeclaration,
 
              .registerBundleId,
+
              .expireBuild:
             return []
         }
@@ -229,6 +241,7 @@ extension AscEndpoint: Endpoint {
         case .read,
              .listAppStoreVersions,
              .listAppInfos,
+             .getAgeRatings,
              .listAccessibilityDeclarations,
              .listAllBetaGroupsForTester:
             .get
@@ -239,6 +252,7 @@ extension AscEndpoint: Endpoint {
             .post
         case .expireBuild,
              .updateAccessibilityDeclaration,
+             .updateAgeRatings,
              .publishAccessibilityDeclaration:
             .patch
         case .deleteAccessibilityDeclaration:
@@ -275,6 +289,7 @@ extension AscEndpoint: Endpoint {
         case .read,
              .listAppStoreVersions,
              .listAppInfos,
+             .getAgeRatings,
              .listAccessibilityDeclarations,
              .listAllBetaGroupsForTester,
              .deleteAccessibilityDeclaration:
@@ -322,11 +337,20 @@ extension AscEndpoint: Endpoint {
                 ]
             ]
 
-        case let .updateAccessibilityDeclaration(id, parameters):
+        case let .updateAccessibilityDeclaration(accessibilityDeclarationId, parameters):
             return [
                 "data": [
                     "type": "accessibilityDeclarations",
-                    "id": "\(id)",
+                    "id": "\(accessibilityDeclarationId)",
+                    "attributes": parameters,
+                ]
+            ]
+
+        case let .updateAgeRatings(ageRatingDeclarationId, parameters):
+            return [
+                "data": [
+                    "type": "ageRatingDeclarations",
+                    "id": "\(ageRatingDeclarationId)",
                     "attributes": parameters,
                 ]
             ]

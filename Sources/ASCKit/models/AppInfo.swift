@@ -7,11 +7,18 @@
 
 import Foundation
 
-public struct AppInfos: IdentifiableModel {
+public struct AppInfo: IdentifiableModel {
     public var id: String
     public var type: String
+    public var attributes: Attributes
 
     public var name: String {
         id
+    }
+}
+
+public extension AppInfo {
+    struct Attributes: Model {
+        public var state: AppStoreVersion.State
     }
 }
