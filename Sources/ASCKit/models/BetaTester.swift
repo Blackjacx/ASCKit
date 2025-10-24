@@ -52,17 +52,3 @@ public extension BetaTester {
         case lastName
     }
 }
-
-public extension Array where Element == BetaTester {
-
-    func out(_ attribute: String?) {
-        switch attribute {
-        case "name": out(\.name, attribute: attribute)
-        case "attributes": out(\.attributes, attribute: attribute)
-        case "firstName": out(\.attributes.firstName, attribute: attribute)
-        case "lastName": out(\.attributes.lastName, attribute: attribute)
-        case "email": out(\.attributes.email, attribute: attribute)
-        default: out()
-        }
-    }
-}

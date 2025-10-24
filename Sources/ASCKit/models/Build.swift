@@ -66,20 +66,3 @@ public extension Build {
         case preReleaseVersionPlatform = "preReleaseVersion.platform"
     }
 }
-
-public extension Array where Element == Build {
-
-    func out(_ attribute: String?) {
-        switch attribute {
-        case "attributes": out(\.attributes)
-        case "expired": out(\.attributes.expired)
-        case "minOsVersion": out(\.attributes.minOsVersion)
-        case "processingState": out(\.attributes.processingState)
-        case "version": out(\.attributes.version)
-        case "usesNonExemptEncryption": out(\.attributes.usesNonExemptEncryption)
-        case "uploadedDate": out(\.attributes.uploadedDate)
-//        case "expirationDate": out(\.attributes.expirationDate) // see above
-        default: out()
-        }
-    }
-}

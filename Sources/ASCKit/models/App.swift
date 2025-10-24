@@ -49,16 +49,3 @@ public extension App {
         case appStoreVersionsAppStoreState = "appStoreVersions.appStoreState"
     }
 }
-
-public extension Array where Element == App {
-
-    func out(_ attribute: String?) {
-        switch attribute {
-        case "name": out(\.attributes.name)
-        case "attributes": out(\.attributes)
-        case "bundleId": out(\.attributes.bundleId)
-        case "locale": out(\.attributes.primaryLocale)
-        default: out()
-        }
-    }
-}
