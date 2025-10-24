@@ -17,6 +17,9 @@ public enum AscError: Error {
     case apiKeyNotFound(_ id: String)
     case apiKeyActivationFailed(_ key: ApiKey)
     case requestFailed(underlyingErrors: [Error])
+    case requestFailed(underlyingError: Error)
+    /// Maps partial errors and includes IDs of the original objects passed to the request.
+    case requestFailedPartially(underlyingErrors: [String: Error])
 
     case jsonStringToDataConversionFailed(_ json: String)
     case dataToJsonObjectConversionFailed(_ data: Data)

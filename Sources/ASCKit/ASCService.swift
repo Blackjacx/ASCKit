@@ -153,15 +153,7 @@ public enum ASCService {
             filters: filters,
             limit: limit
         )
-
-        do {
-            return try await network.request(
-                endpoint: endpoint,
-                outputType: outputType,
-            )
-        } catch {
-            throw AscError.requestFailed(underlyingErrors: [error])
-        }
+        return try await request(endpoint: endpoint, outputType: outputType)
     }
 
     @discardableResult
@@ -180,14 +172,7 @@ public enum ASCService {
             deviceFamily: deviceFamily,
             parameters: parameterDict,
         )
-        do {
-            return try await network.request(
-                endpoint: endpoint,
-                outputType: outputType,
-            )
-        } catch {
-            throw AscError.requestFailed(underlyingErrors: [error])
-        }
+        return try await request(endpoint: endpoint, outputType: outputType)
     }
 
     @discardableResult
@@ -198,20 +183,15 @@ public enum ASCService {
     ) async throws -> AccessibilityDeclaration {
         let jsonObject = try Self.jsonObject(from: parameters)
         guard let parameterDict = jsonObject as? [String: Any] else {
-            throw AscError.invalidInput("Expected dictionary, got \(jsonObject.self).")
+            throw AscError.invalidInput(
+                "Expected dictionary, got \(jsonObject.self)."
+            )
         }
         let endpoint = AscEndpoint.updateAccessibilityDeclaration(
             id: id,
             parameters: parameterDict,
         )
-        do {
-            return try await network.request(
-                endpoint: endpoint,
-                outputType: outputType,
-            )
-        } catch {
-            throw AscError.requestFailed(underlyingErrors: [error])
-        }
+        return try await request(endpoint: endpoint, outputType: outputType)
     }
 
     @discardableResult
@@ -222,14 +202,7 @@ public enum ASCService {
         let endpoint = AscEndpoint.deleteAccessibilityDeclaration(
             id: id,
         )
-        do {
-            return try await network.request(
-                endpoint: endpoint,
-                outputType: outputType,
-            )
-        } catch {
-            throw AscError.requestFailed(underlyingErrors: [error])
-        }
+        return try await request(endpoint: endpoint, outputType: outputType)
     }
 
     @discardableResult
@@ -240,14 +213,7 @@ public enum ASCService {
         let endpoint = AscEndpoint.publishAccessibilityDeclaration(
             id: id,
         )
-        do {
-            return try await network.request(
-                endpoint: endpoint,
-                outputType: outputType,
-            )
-        } catch {
-            throw AscError.requestFailed(underlyingErrors: [error])
-        }
+        return try await request(endpoint: endpoint, outputType: outputType)
     }
 
     @discardableResult
@@ -368,6 +334,134 @@ public enum ASCService {
         return results
     }
 
+    // MARK: - App Infos
+
+    @discardableResult
+    public static func listAppInfos(
+        appId: String,
+        limit: UInt? = nil,
+        outputType: OutputType,
+    ) async throws -> [AppInfo] {
+        let endpoint = AscEndpoint.listAppInfos(
+            appId: appId,
+            limit: limit
+        )
+        return try await request(endpoint: endpoint, outputType: outputType)
+    }
+
+    // MARK: - Age Ratings
+
+    @discardableResult
+    public static func getAgeRatings(
+        appInfoId: String,
+        outputType: OutputType,
+    ) async throws -> AgeRatings {
+        let endpoint = AscEndpoint.getAgeRatings(
+            appInfoId: appInfoId
+        )
+        return try await request(endpoint: endpoint, outputType: outputType)
+    }
+
+    @discardableResult
+    public static func listAgeRatings(
+        appId: String,
+        outputType: OutputType,
+    ) async throws -> [AgeRatings] {
+        let appInfos = try await listAppInfos(
+            appId: appId,
+            outputType: .none
+        )
+        var results: [AgeRatings] = []
+        for appInfo in appInfos {
+            results.append(
+                try await getAgeRatings(
+                    appInfoId: appInfo.id,
+                    outputType: outputType
+                )
+            )
+        }
+        return results
+    }
+
+    @discardableResult
+    public static func updateAgeRatings(
+        appId: String,
+        parameters: String,
+        outputType: OutputType,
+    ) async throws -> [AgeRatings] {
+
+        // Convert JSON parameter string to JSON dictionary
+
+        let jsonObject = try Self.jsonObject(from: parameters)
+        guard let parameterDict = jsonObject as? [String: Any] else {
+            throw AscError.invalidInput(
+                "Expected dictionary, got \(jsonObject.self)."
+            )
+        }
+
+        // Determine editable app infos
+
+        let appInfos = try await listAppInfos(appId: appId, outputType: .none)
+        let editableStates: Set<AppStoreVersion.State> = [
+            .developerRejected,
+            .rejected,
+            .waitingForReview,
+            .prepareForSubmission,
+            .waitingForExportCompliance,
+            .invalidBinary,
+            .metadataRejected,
+            .pendingDeveloperRelease,
+        ]
+        let editableAppInfos = appInfos.filter {
+            editableStates.contains($0.attributes.state)
+        }
+        guard !editableAppInfos.isEmpty else {
+            throw AscError.invalidInput("""
+                No editable app infos found for '\(appId)'. Available app info states are: 
+                \(appInfos.map(\.attributes.state))
+                """
+            )
+        }
+
+        // Fetch age rating declaration for each app info object in parallel.
+        // FIXME: 🔴    This can be done much more efficient by specifying inclusions for AppInfos.
+        //              We can directly include the ageRatingDeclaration object
+        //              in each app info response.
+
+        let editableAgeRatingsEndpointMapping = Dictionary(
+            uniqueKeysWithValues: editableAppInfos.map {
+                (
+                    $0.id,
+                    AscEndpoint.getAgeRatings(appInfoId: $0.id),
+                )
+            }
+        )
+        let editableAgeRatings: [AgeRatings] = try await batchRequest(
+            endpointMapping: editableAgeRatingsEndpointMapping,
+            outputType: .none,
+        )
+
+        // Update age rating declarations in parallel
+
+        let updatedAgeRatingsEndpointMapping =  Dictionary(
+            uniqueKeysWithValues: editableAgeRatings.map {
+                (
+                    $0.id,
+                    AscEndpoint.updateAgeRatings(
+                        ageRatingDeclarationId: $0.id,
+                        parameters: parameterDict,
+                    ),
+                )
+            }
+        )
+        let updatedAgeRatings: [AgeRatings] = try await batchRequest(
+            endpointMapping: updatedAgeRatingsEndpointMapping,
+            outputType: outputType,
+        )
+
+        return updatedAgeRatings
+    }
+
     // MARK: - Beta Testers
 
     public static func listBetaGroups(
@@ -376,45 +470,22 @@ public enum ASCService {
         limit: UInt? = nil,
         outputType: OutputType,
     ) async throws -> [BetaGroup] {
-        typealias ResultType = [BetaGroup]
-
-        var results: ResultType = []
-        var errors: [Error] = []
-
-        await withTaskGroup(of: Result<ResultType, Error>.self) { group in
-            for tester in betaTesters {
-                let endpoint = AscEndpoint.listAllBetaGroupsForTester(
-                    id: tester.id,
-                    filters: filters,
-                    limit: limit
+        let endpointMapping = Dictionary(
+            uniqueKeysWithValues: betaTesters.map {
+                (
+                    $0.id,
+                    AscEndpoint.listAllBetaGroupsForTester(
+                        id: $0.id,
+                        filters: filters,
+                        limit: limit
+                    ),
                 )
-
-                group.addTask {
-                    do {
-                        return .success(
-                            try await network.request(
-                                endpoint: endpoint,
-                                outputType: outputType,
-                            )
-                        )
-                    } catch {
-                        return .failure(error)
-                    }
-                }
             }
-
-            for await result in group {
-                switch result {
-                case .success(let result): results.append(contentsOf: result)
-                case .failure(let error): errors.append(error)
-                }
-            }
-        }
-
-        if !errors.isEmpty {
-            throw AscError.requestFailed(underlyingErrors: errors)
-        }
-
+        )
+        let results: [BetaGroup] = try await batchRequest(
+            endpointMapping: endpointMapping,
+            outputType: outputType,
+        )
         return results
     }
 
@@ -627,11 +698,7 @@ public enum ASCService {
             seedId: seedId
         )
         let endpoint = AscEndpoint.registerBundleId(attributes: attributes)
-        let bundleId: BundleId = try await network.request(
-            endpoint: endpoint,
-            outputType: outputType,
-        )
-        return bundleId
+        return try await request(endpoint: endpoint, outputType: outputType)
     }
 
     @discardableResult
@@ -662,8 +729,6 @@ public enum ASCService {
         ids: [String],
         outputType: OutputType,
     ) async throws -> [Build] {
-        typealias ResultType = Build
-
         let filters: [Filter]
 
         if ids.isEmpty {
@@ -681,62 +746,19 @@ public enum ASCService {
             throw AscError.noBuildsFound
         }
 
-        var results: [ResultType] = []
-        var errors: [Error] = []
-
-        await withTaskGroup(of: Result<ResultType, Error>.self) { group in
-            for build in nonExpiredBuilds {
-                let endpoint = AscEndpoint.expireBuild(build)
-
-                group.addTask {
-                    do {
-                        return .success(
-                            try await network.request(
-                                endpoint: endpoint,
-                                outputType: outputType,
-                            )
-                        )
-                    } catch {
-                        return .failure(error)
-                    }
-                }
+        let endpointMapping = Dictionary(
+            uniqueKeysWithValues: nonExpiredBuilds.map {
+                (
+                    $0.id,
+                    AscEndpoint.expireBuild($0),
+                )
             }
-
-            for await result in group {
-                switch result {
-                case .success(let result): results.append(result)
-                case .failure(let error): errors.append(error)
-                }
-            }
-        }
-
-        if !errors.isEmpty {
-            throw AscError.requestFailed(underlyingErrors: errors)
-        }
-
-        return results
-    }
-
-    // MARK: - App Infos
-
-    @discardableResult
-    public static func listAppInfos(
-        appId: String,
-        limit: UInt? = nil,
-        outputType: OutputType,
-    ) async throws -> [AppInfos] {
-        let endpoint = AscEndpoint.listAppInfos(
-            appId: appId,
-            limit: limit
         )
-        do {
-            return try await network.request(
-                endpoint: endpoint,
-                outputType: outputType,
-            )
-        } catch {
-            throw AscError.requestFailed(underlyingErrors: [error])
-        }
+        let results: [Build] = try await batchRequest(
+            endpointMapping: endpointMapping,
+            outputType: outputType,
+        )
+        return results
     }
 
     // MARK: - Helpers
@@ -750,6 +772,65 @@ public enum ASCService {
             return try JSONSerialization.jsonObject(with: data)
         } catch {
             throw AscError.dataToJsonObjectConversionFailed(data)
+        }
+    }
+
+    /// Convenience function for condensing/simplifying many of the request
+    /// functions above.
+    private static func request<T: Decodable>(
+        endpoint: Endpoint,
+        outputType: OutputType,
+    ) async throws -> T {
+        do {
+            return try await network.request(
+                endpoint: endpoint,
+                outputType: outputType,
+            )
+        } catch {
+            throw AscError.requestFailed(underlyingError: error)
+        }
+    }
+
+    private static func batchRequest<T: Decodable>(
+        endpointMapping: [String: Endpoint],
+        outputType: OutputType,
+    ) async throws -> [T] {
+        try await withThrowingTaskGroup(
+            of: (String, Result<T, Error>).self
+        ) { group in
+            for (id, endpoint) in endpointMapping {
+                group.addTask {
+                    do {
+                        let model: T = try await network.request(
+                            endpoint: endpoint,
+                            outputType: outputType
+                        )
+                        return (id, .success(model))
+                    } catch {
+                        return (id, .failure(error))
+                    }
+                }
+            }
+
+            var results: [T] = []
+            var errors: [String: Error] = [:]
+
+            // Collect results, separating successes and failures
+            for try await (id, result) in group {
+                switch result {
+                case .success(let model):
+                    results += [model]
+                case .failure(let error):
+                    errors[id] = error
+                }
+            }
+
+            // If any fetches failed, throw a custom error
+            if !errors.isEmpty {
+                throw AscError.requestFailedPartially(underlyingErrors: errors)
+            }
+
+            return results
         }
     }
 }
