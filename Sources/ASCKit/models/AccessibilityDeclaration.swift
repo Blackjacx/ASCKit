@@ -48,14 +48,3 @@ public extension AccessibilityDeclaration {
         case state
     }
 }
-
-public extension Array where Element == AccessibilityDeclaration {
-
-    func out(_ attribute: String?) {
-        switch attribute {
-        case "id": out(\.id, attribute: attribute)
-        case "attributes": out(\.attributes, attribute: attribute)
-        default: out()
-        }
-    }
-}
