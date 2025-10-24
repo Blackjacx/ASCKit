@@ -11,7 +11,6 @@ public struct AppStoreVersion: IdentifiableModel {
     public var id: String
     public var type: String
     public var attributes: Attributes
-    public var relationships: Relationships
 
     public var name: String { "" }
 }
@@ -48,14 +47,5 @@ public extension AppStoreVersion {
         public var appStoreState: State
         public var copyright: String? = ""
         public var createdDate: Date
-    }
-
-    struct Relationships: Model {
-//        var betaGroups: Relation
-//        var preReleaseVersions: Relation
-//        var betaAppLocalizations: Relation
-//        var builds: Relation
-//        var betaLicenseAgreement: Relation
-//        var betaAppReviewDetail: Relation
     }
 }
