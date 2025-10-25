@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 - [#23](https://github.com/dbdrive/beiwagen/pull/23): Remove legacy output functionality - [@blackjacx](https://github.com/blackjacx).
+- [#22](https://github.com/dbdrive/beiwagen/pull/22): Support Age Ratings - [@blackjacx](https://github.com/blackjacx).
 
 ## [0.6.0] - 2025-10-23Z
 

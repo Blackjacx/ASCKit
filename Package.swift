@@ -13,8 +13,8 @@ let package = Package(
         .library(name: "ASCKit", targets: ["ASCKit"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/blackjacx/Engine", from: "0.3.0"),
-//        .package(path: "../Engine"),
+//        .package(url: "https://github.com/blackjacx/Engine", from: "0.3.0"),
+        .package(path: "../Engine"),
     ],
     targets: [
         .target(
