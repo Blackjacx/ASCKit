@@ -339,12 +339,14 @@ public enum ASCService {
     @discardableResult
     public static func listAppInfos(
         appId: String,
+        includedResources: [AppInfoResponse.IncludedResource.Types] = [],
         limit: UInt? = nil,
         outputType: OutputType,
-    ) async throws -> [AppInfo] {
+    ) async throws -> AppInfoResponse {
         let endpoint = AscEndpoint.listAppInfos(
             appId: appId,
-            limit: limit
+            includedResources: includedResources,
+            limit: limit,
         )
         return try await request(endpoint: endpoint, outputType: outputType)
     }
@@ -352,10 +354,10 @@ public enum ASCService {
     // MARK: - Age Ratings
 
     @discardableResult
-    public static func getAgeRatings(
+    public static func getAgeRatingDeclaration(
         appInfoId: String,
         outputType: OutputType,
-    ) async throws -> AgeRatings {
+    ) async throws -> AgeRatingDeclaration {
         let endpoint = AscEndpoint.getAgeRatings(
             appInfoId: appInfoId
         )
@@ -363,18 +365,18 @@ public enum ASCService {
     }
 
     @discardableResult
-    public static func listAgeRatings(
+    public static func listAgeRatingDeclarations(
         appId: String,
         outputType: OutputType,
-    ) async throws -> [AgeRatings] {
-        let appInfos = try await listAppInfos(
+    ) async throws -> [AgeRatingDeclaration] {
+        let appInfosResponse = try await listAppInfos(
             appId: appId,
             outputType: .none
         )
-        var results: [AgeRatings] = []
-        for appInfo in appInfos {
+        var results: [AgeRatingDeclaration] = []
+        for appInfo in appInfosResponse.data {
             results.append(
-                try await getAgeRatings(
+                try await getAgeRatingDeclaration(
                     appInfoId: appInfo.id,
                     outputType: outputType
                 )
@@ -388,8 +390,7 @@ public enum ASCService {
         appId: String,
         parameters: String,
         outputType: OutputType,
-    ) async throws -> [AgeRatings] {
-
+    ) async throws -> [AgeRatingDeclaration] {
         // Convert JSON parameter string to JSON dictionary
 
         let jsonObject = try Self.jsonObject(from: parameters)
@@ -401,7 +402,12 @@ public enum ASCService {
 
         // Determine editable app infos
 
-        let appInfos = try await listAppInfos(appId: appId, outputType: .none)
+        let appInfosResponse = try await listAppInfos(
+            appId: appId,
+            includedResources: [.ageRatingDeclaration],
+            outputType: .none
+        )
+
         let editableStates: Set<AppStoreVersion.State> = [
             .developerRejected,
             .rejected,
@@ -412,34 +418,55 @@ public enum ASCService {
             .metadataRejected,
             .pendingDeveloperRelease,
         ]
-        let editableAppInfos = appInfos.filter {
+        let editableAppInfos = appInfosResponse.data.filter {
             editableStates.contains($0.attributes.state)
         }
         guard !editableAppInfos.isEmpty else {
             throw AscError.invalidInput("""
                 No editable app infos found for '\(appId)'. Available app info states are: 
-                \(appInfos.map(\.attributes.state))
+                \(appInfosResponse.data.map(\.attributes.state))
+                """
+            )
+        }
+
+        let editableAgeRatings: [AgeRatingDeclaration] = appInfosResponse.included?.compactMap {
+            guard case let .ageRatingDeclaration(value) = $0,
+                  // YES - luckily the ID of the AgeRatingDeclaration matches
+                  // the ID of its corresponding AppInfo. If this changes some
+                  // day we need some kind of reference back to the app info
+                  // object. Or to simplify things we fallback to the commented
+                  // part below.
+                  editableAppInfos.map(\.id).contains(value.id) else {
+                return nil
+            }
+            return value
+        } ?? []
+
+        guard !editableAgeRatings.isEmpty else {
+            throw AscError.invalidInput("""
+                We found editable app infos but no editable age ratings. 
+                Something went wrong during filtering. Please check. 
                 """
             )
         }
 
         // Fetch age rating declaration for each app info object in parallel.
-        // FIXME: 🔴    This can be done much more efficient by specifying inclusions for AppInfos.
-        //              We can directly include the ageRatingDeclaration object
-        //              in each app info response.
+        // ⚠️ This can be done much more efficient by specifying inclusions for
+        //    AppInfos. We can directly include the ageRatingDeclaration object
+        //    in each app info response.
 
-        let editableAgeRatingsEndpointMapping = Dictionary(
-            uniqueKeysWithValues: editableAppInfos.map {
-                (
-                    $0.id,
-                    AscEndpoint.getAgeRatings(appInfoId: $0.id),
-                )
-            }
-        )
-        let editableAgeRatings: [AgeRatings] = try await batchRequest(
-            endpointMapping: editableAgeRatingsEndpointMapping,
-            outputType: .none,
-        )
+//        let editableAgeRatingsEndpointMapping = Dictionary(
+//            uniqueKeysWithValues: editableAppInfos.map {
+//                (
+//                    $0.id,
+//                    AscEndpoint.getAgeRatings(appInfoId: $0.id),
+//                )
+//            }
+//        )
+//        let editableAgeRatings: [AgeRatingDeclaration] = try await batchRequest(
+//            endpointMapping: editableAgeRatingsEndpointMapping,
+//            outputType: .none,
+//        )
 
         // Update age rating declarations in parallel
 
@@ -454,7 +481,7 @@ public enum ASCService {
                 )
             }
         )
-        let updatedAgeRatings: [AgeRatings] = try await batchRequest(
+        let updatedAgeRatings: [AgeRatingDeclaration] = try await batchRequest(
             endpointMapping: updatedAgeRatingsEndpointMapping,
             outputType: outputType,
         )
@@ -582,7 +609,8 @@ public enum ASCService {
                     do {
                         // FIXME: 🟢 convert to category-scoped OSLog outoput
 //                        print(
-//                            "Added tester: \(result.name), email: \(email), id: \(result.id) to group: \(betaGroup.name), id: \(betaGroup.id)"
+//                            "Added tester: \(result.name), email: \(email), id: \(result.id) to group: \(betaGroup.name), id:
+//                            \(betaGroup.id)"
 //                        )
                         return .success(
                             try await network.request(

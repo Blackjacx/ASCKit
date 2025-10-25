@@ -22,7 +22,7 @@ enum AscEndpoint {
 
     case listAppStoreVersions(appId: String, filters: [Filter], limit: UInt?)
 
-    case listAppInfos(appId: String, limit: UInt?)
+    case listAppInfos(appId: String, includedResources: [AppInfoResponse.IncludedResource.Types], limit: UInt?)
 
     case getAgeRatings(appInfoId: String)
     case updateAgeRatings(ageRatingDeclarationId: String, parameters: [String: Any])
@@ -173,7 +173,7 @@ extension AscEndpoint: Endpoint {
         case let .listAppStoreVersions(appId, _, _):
             "/\(apiVersion)/apps/\(appId)/appStoreVersions"
 
-        case let .listAppInfos(appId, limit):
+        case let .listAppInfos(appId, _, _):
             "/\(apiVersion)/apps/\(appId)/appInfos"
 
         case let .getAgeRatings(appInfoId):
@@ -215,8 +215,12 @@ extension AscEndpoint: Endpoint {
              .listAllBetaGroupsForTester(_, let filters, let limit):
             return queryItems(from: filters, limit: limit)
 
-        case .listAppInfos(_, let limit):
-            return queryItems(from: [], limit: limit)
+        case .listAppInfos(_, let includedResources, let limit):
+            var items = queryItems(from: [], limit: limit)
+            items += includedResources.map {
+                URLQueryItem(name: "include", value: $0.rawValue)
+            }
+            return items
 
         case .inviteBetaTester,
              .addBetaTester,
@@ -419,7 +423,11 @@ extension AscEndpoint: Endpoint {
     }
 
     func jsonDecode<T: Decodable>(_ type: T.Type, from data: Data) throws -> T {
-        try Json.decoder.decode(DataWrapper<T>.self, from: data).data
+        do {
+            return try Json.decoder.decode(T.self, from: data)
+        } catch {
+            return try Json.decoder.decode(DataWrapper<T>.self, from: data).data
+        }
     }
 }
 

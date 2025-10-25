@@ -1,6 +1,6 @@
 import Foundation
 
-public struct AgeRatings: IdentifiableModel {
+public struct AgeRatingDeclaration: IdentifiableModel {
     public var id: String
     public var type: String
     public var attributes: Attributes
@@ -10,7 +10,7 @@ public struct AgeRatings: IdentifiableModel {
     }
 }
 
-public extension AgeRatings {
+public extension AgeRatingDeclaration {
 
     enum KidsAgeBand: String, CaseIterable, Model {
         case fiveAndUnder = "FIVE_AND_UNDER"
@@ -36,7 +36,7 @@ public extension AgeRatings {
     enum Frequency: String, CaseIterable, Model {
         case none = "NONE"
         case infrequentOrMild = "INFREQUENT_OR_MILD"
-        case frequentOrintense = "FREQUENT_OR_INTENSE"
+        case frequentOrIntense = "FREQUENT_OR_INTENSE"
         case infrequent = "INFREQUENT"
         case frequent = "FREQUENT"
     }
