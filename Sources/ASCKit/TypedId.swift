@@ -1,13 +1,10 @@
-//
-//  TypedId.swift
-//  ASCKit
-//
-//  Created by Stefan Herold on 25.10.25.
-//
-
-
 // MARK: - ID Type
 
+/// Used to access resources by different kinds of IDs.
+///
+/// For example you can list all ``AppInfo`` objects for an app by specifying
+/// `appId:<app-id>` or you can fetch one specific using
+/// `appInfoId:<app-info-id>`.
 public enum TypedId: CustomStringConvertible, CaseIterable {
     case appId(String)
     case appInfoId(String)
@@ -29,7 +26,7 @@ public enum TypedId: CustomStringConvertible, CaseIterable {
     }
 
     // ExpressibleByArgument
-    
+
     public init?(argument: String) {
         // 1. Split the argument by the first colon to separate the case
         // name from the value.
