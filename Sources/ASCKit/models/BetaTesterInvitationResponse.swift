@@ -7,9 +7,9 @@
 
 import Foundation
 
-struct BetaTesterInvitationResponse: IdentifiableModel {
-    var id: String
-    var type: String
+public struct BetaTesterInvitationResponse: IdentifiableModel {
+    public var id: String
+    public var type: String
 
     public var name: String { "" }
 }

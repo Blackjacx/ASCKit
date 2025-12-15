@@ -46,17 +46,3 @@ public extension BundleId {
         case seedId
     }
 }
-
-public extension Array where Element == BundleId {
-
-    func out(_ attribute: String?) {
-        switch attribute {
-        case "attributes": out(\.attributes, attribute: attribute)
-        case "identifier": out(\.attributes.identifier, attribute: attribute)
-        case "name": out(\.attributes.name, attribute: attribute)
-        case "platform": out(\.attributes.platform, attribute: attribute)
-        case "seedid": out(\.attributes.seedId, attribute: attribute)
-        default: out()
-        }
-    }
-}

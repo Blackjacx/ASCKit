@@ -38,14 +38,3 @@ public extension BetaGroup {
         case publicLink
     }
 }
-
-public extension Array where Element == BetaGroup {
-
-    func out(_ attribute: String?) {
-        switch attribute {
-        case "name": out(\.attributes.name)
-        case "attributes": out(\.attributes)
-        default: out()
-        }
-    }
-}
