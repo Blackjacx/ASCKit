@@ -21,7 +21,7 @@ public struct AppInfoResponse: IdentifiableModel {
     let data: [AppInfo]
     let included: [IncludedResource]?
 
-    public var id: String = UUID().uuidString
+    public let id: String = UUID().uuidString
     public var name: String {
         id
     }
