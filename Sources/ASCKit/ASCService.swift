@@ -509,11 +509,15 @@ public enum ASCService {
                 )
             }
         )
-        let results: [BetaGroup] = try await batchRequest(
+
+        // Each single request results in an array of beta groups. Therefore all
+        // requests together result in a nested array of beta groups. Each
+        // nesting defines the groups of the tester for a specific app.
+        let results: [[BetaGroup]] = try await batchRequest(
             endpointMapping: endpointMapping,
             outputType: outputType,
         )
-        return results
+        return results.flatMap { $0 }
     }
 
     public static func inviteBetaTester(
