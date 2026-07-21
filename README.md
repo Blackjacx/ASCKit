@@ -47,7 +47,10 @@ To release this Swift package the following steps have to be taken:
   ```
   git commit -am "Release version 'x.y.z'"
   ```
-- Run `bundle exec fastlane release framework:"ASCKit" version:"x.y.z"` to release the new version
+- Release the new version using:
+  ```
+  bundle exec fastlane release framework:"ASCKit" version:"x.y.z"
+  ```
 - Post the following on Twitter:
 
   ```
