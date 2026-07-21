@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+
+## [0.7.4] - 2026-07-21Z
 - Bump Engine 0.3.3 - [@blackjacx](https://github.com/blackjacx). 
 
 ## [0.7.3] - 2026-07-21Z
