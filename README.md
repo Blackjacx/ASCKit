@@ -7,7 +7,7 @@
 [![Swift Package Manager Compatible](https://img.shields.io/badge/SPM-compatible-brightgreen.svg)](https://swift.org/package-manager/)
 [![Swift Versions](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2FBlackjacx%2FASCKit%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/Blackjacx/ASCKit)
 [![Platforms](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2FBlackjacx%2FASCKit%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/Blackjacx/ASCKit)
-[![Xcode 16+](https://img.shields.io/badge/Xcode-16%2B-blue.svg)](https://developer.apple.com/download/)
+[![Xcode 26+](https://img.shields.io/badge/Xcode-26%2B-blue.svg)](https://developer.apple.com/download/)
 [![License](https://img.shields.io/github/license/blackjacx/asckit.svg)](https://github.com/Blackjacx/asckit/blob/develop/LICENSE)
 [![Donate](https://img.shields.io/badge/Donate-PayPal-blue.svg?logo=paypal&style=for-the-badge)](https://www.paypal.me/STHEROLD)
 
@@ -49,6 +49,7 @@ To release this Swift package the following steps have to be taken:
   ```
 - Run `bundle exec fastlane release framework:"ASCKit" version:"x.y.z"` to release the new version
 - Post the following on Twitter:
+
   ```
   ASCKit release x.y.z 🎉
 
