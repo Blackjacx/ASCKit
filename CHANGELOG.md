@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- Bump Engine 0.3.3 - [@blackjacx](https://github.com/blackjacx). 
 
 ## [0.7.3] - 2026-07-21Z
 - [#28](https://github.com/Blackjacx/ASCKit/pull/28): Adopt social media age rating questions in API version 4.4.1 - [@blackjacx](https://github.com/blackjacx). 
