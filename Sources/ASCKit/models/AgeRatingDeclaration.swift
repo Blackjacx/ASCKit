@@ -68,5 +68,7 @@ public extension AgeRatingDeclaration {
         public var messagingAndChat: Bool?
         public var parentalControls: Bool?
         public var userGeneratedContent: Bool?
+        public var socialMedia: Bool?
+        public var socialMediaAgeRestricted: Bool?
     }
 }

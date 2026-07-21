@@ -1,27 +1,28 @@
 # Changelog
 
 ## [Unreleased]
+- [#28](https://github.com/Blackjacx/ASCKit/pull/28): Adopt social media age rating questions in API version 4.4.1 - [@blackjacx](https://github.com/blackjacx). 
 
 ## [0.7.0] - 2025-12-15Z
 
-- [#23](https://github.com/dbdrive/beiwagen/pull/23): Remove legacy output functionality - [@blackjacx](https://github.com/blackjacx).
-- [#22](https://github.com/dbdrive/beiwagen/pull/22): Support Age Ratings - [@blackjacx](https://github.com/blackjacx).
+- [#23](https://github.com/Blackjacx/ASCKit/pull/23): Remove legacy output functionality - [@blackjacx](https://github.com/blackjacx).
+- [#22](https://github.com/Blackjacx/ASCKit/pull/22): Support Age Ratings - [@blackjacx](https://github.com/blackjacx).
 
 ## [0.6.0] - 2025-10-23Z
 
-- [#21](https://github.com/dbdrive/beiwagen/pull/21): Support request output types - [@blackjacx](https://github.com/blackjacx).
+- [#21](https://github.com/Blackjacx/ASCKit/pull/21): Support request output types - [@blackjacx](https://github.com/blackjacx).
 
 ## [0.5.0] - 2025-10-23Z
 
-- [#20](https://github.com/dbdrive/beiwagen/pull/20): Add support for Accessibility Declaration management - [@blackjacx](https://github.com/blackjacx).
+- [#20](https://github.com/Blackjacx/ASCKit/pull/20): Add support for Accessibility Declaration management - [@blackjacx](https://github.com/blackjacx).
 
 ## [0.4.1] - 2025-09-15Z
 
-- [#15](https://github.com/dbdrive/beiwagen/pull/15): Bump Engine v0.2.0 - [@blackjacx](https://github.com/blackjacx).
+- [#15](https://github.com/Blackjacx/ASCKit/pull/15): Bump Engine v0.2.0 - [@blackjacx](https://github.com/blackjacx).
 
 ## [0.4.0] - 2025-03-19Z
 
-- [#14](https://github.com/dbdrive/beiwagen/pull/14): Add missing app store version states - [@blackjacx](https://github.com/blackjacx).
+- [#14](https://github.com/Blackjacx/ASCKit/pull/14): Add missing app store version states - [@blackjacx](https://github.com/blackjacx).
 
 ## [0.3.0] - 2025-02-17Z
 
